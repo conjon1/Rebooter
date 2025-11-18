@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Docker is not a Sandbox</title>
+    <meta name="date" content="November 12, 2025">
+    <meta name="excerpt" content="One of the biggest misconceptions I see about Docker is that it’s somehow sandboxed—a place where you can safely test programs and services in isolation.">
+    <meta name="author" content="Connal McInnis">
+
+    <style>
+        /* A little bit of basic styling for the post content */
+        body { 
+            line-height: 1.6; 
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        h1, h2, h3, h4, h5 { line-height: 1.2; margin-top: 1.5em; }
+        code { 
+            background-color: #333; 
+            color: #f1f1f1;
+            padding: 2px 5px; 
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+        }
+        pre { 
+            background-color: #282c34; 
+            color: #abb2bf;
+            padding: 1em; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        strong {
+            font-weight: bold;
+        }
+        blockquote {
+            border-left: 4px solid #ccc;
+            padding-left: 1em;
+            margin-left: 0;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Docker is not a Sandbox</h1>
+    <p>One of the biggest misconceptions I see about Docker is that it’s somehow <strong>sandboxed</strong>—a place where you can safely test programs and services in isolation.</p>
+
+    <p>This is simply not true.</p>
+
+    <p>In reality, Docker is just sophisticated plumbing on top of your system. It uses <strong>root privileges</strong>, a background <strong>daemon</strong>, and a set of Linux kernel features like <strong>namespaces</strong> and <strong>cgroups</strong> to keep the container <strong>contained</strong>—but only by convention, not by isolation guarantees.</p>
+
+    <p>Docker makes development frictionless, but it was never designed to be a fortress. Treating it like one is a common and dangerous mistake.</p>
+
+    <p>In this post, we’ll explore how Docker actually works from an architectural standpoint, expose the limits of its “sandbox,” and show a few examples of how containers can break free—plus best practices to mitigate those threats.</p>
+
+    <h2>How Docker Works</h2>
+    <blockquote>
+        <p>“Docker is a set of platform as a service (PaaS) products that uses operating-system-level virtualization to deliver software in packages called containers.”
+        — <a href="https://en.wikipedia.org/wiki/Docker_(software)">Wikipedia</a></p>
+    </blockquote>
+
+    <p>Docker isn’t magic—it’s a system built on top of Linux primitives. Understanding those primitives is key to knowing why it isn’t a sandbox.</p>
+
+    <h3>The purpose of Docker</h3>
+
+    <p>Docker is <strong>operating-system-level virtualization</strong>, not <strong>hardware-level virtualization</strong>.</p>
+
+    <p>That distinction matters. It means that all containers on a Linux host share the same kernel. They aren’t virtual machines with their own hardware abstraction—they’re processes running on the same kernel, <em>isolated by rules</em> , not by hardware.</p>
+
+    <p>That’s what makes Docker so lightweight and fast: starting a container is like starting a process. It’s perfect for packaging and shipping software along with its dependencies.</p>
+
+    <p>But that shared kernel also means containers are only as secure as the kernel itself. A vulnerability in the kernel, or in Docker’s configuration, can give a container direct access to the host.</p>
+
+
+    <h3>Overview of Docker’s Architecture</h3>
+
+    <p>Docker’s architecture is built around three core components that work together to make containers feel isolated:</p>
+
+    <ol>
+        <li><strong>Docker Daemon (<code>dockerd</code>)</strong> – The engine running on your host. It manages images, containers, networks, and volumes. It runs as <strong>root</strong> by default, which means every container operation ultimately touches privileged parts of your system.</li>
+        <li><strong>Container Runtime (<code>containerd</code> and <code>runc</code>)</strong> – The tools that actually <strong>create</strong> containers. They talk directly to the Linux kernel, using system calls to spawn processes inside isolated namespaces and apply cgroups for resource control.</li>
+        <li><strong>Images and Filesystems</strong> – Containers are built from layered filesystems (like OverlayFS). Each layer is read-only, and a writable layer is added on top when the container runs. It feels like a clean filesystem—but under the hood, it’s a collection of diffs and mount points.</li>
+    </ol>
+
+    <p>At a high level, Docker provides a user-friendly interface to these low-level kernel features. You type <code>docker run</code>, and Docker orchestrates namespaces, control groups, mounts, and network bridges for you.</p>
+
+    <p>It’s elegant. It’s efficient. But it’s not isolated.</p>
+
+    <h3>How the Illusion Works</h3>
+    <p>Docker’s magic trick is the illusion of separation. Here’s how the main components play their part:</p>
+
+    <ul>
+        <li><strong>Namespaces</strong> – Create isolated views of the system: process IDs, filesystems, users, networks. Each container thinks it’s alone, but all share the same kernel.</li>
+        <li><strong>Cgroups</strong> – Limit CPU, memory, and I/O usage. They prevent one container from hogging resources, but not from exploiting the kernel.</li>
+        <li><strong>OverlayFS</strong> – Creates the illusion of a separate root filesystem. Changes made in a container don’t affect the base image—but they still live on the same host storage.</li>
+        <li><strong>Bridged Networking</strong> – Docker’s network stack uses virtual Ethernet bridges (like <code>docker0</code>) to connect containers. It’s convenient, but not inherently secure.</li>
+    </ul>
+
+    <p>Docker’s isolation stops at the kernel boundary. It doesn’t emulate hardware. It doesn’t create true virtual machines.</p>
+    <p>It’s a shared playground, not a sealed vault.</p>
+
+    <h3>Threat Modeling Docker’s Architecture — how it works, how it breaks, how to stop it</h3>
+
+    <p>We’ll walk component by component. For each: a short explainer of how it works, the concrete ways it is abused in the wild, and clear, actionable mitigations you can use today.</p>
+
+    <h4>Docker daemon (<code>dockerd</code>) — the one process that changes everything</h4>
+    <p>How it works</p>
+    <ul>
+        <li><code>dockerd</code> is the service that manages images, containers, networks and volumes.</li>
+        <li>It exposes a UNIX socket (<code>/var/run/docker.sock</code>) and an HTTP API. The daemon usually runs as root and performs privileged operations on behalf of users or services.</li>
+    </ul>
+
+    <h5>How it’s abused</h5>
+    <ul>
+        <li><strong>Socket abuse:</strong> If a container or user can write to <code>/var/run/docker.sock</code> they can talk to the daemon as if they were admin. The Docker API can create new containers, mount host paths, set <code>--privileged</code>, and run arbitrary commands — i.e., full host control.</li>
+        <li><strong>Misconfigured access:</strong> Adding untrusted users to the <code>docker</code> group effectively gives them root-equivalent powers because they can control the daemon.</li>
+        <li><strong>Remote exposure:</strong> Exposing the API over TCP (even with TLS misconfigured) opens the same attack surface to the network.</li>
+    </ul>
+
+    <p>Why it’s powerful as an attack vector</p>
+    <ul>
+        <li>The daemon is a privileged choke point. Everything that runs through it gets installed/started with host-level hooks (mounts, network setup, capabilities).</li>
+    </ul>
+
+    <h5>Safe mitigations</h5>
+    <ul>
+        <li><strong>Never mount the Docker socket into untrusted containers.</strong></li>
+        <li><strong>Don’t add untrusted users to the <code>docker</code> group.</strong> Treat membership like sudo.</li>
+        <li><strong>Prefer rootless Docker</strong> for developer machines and CI runners where full root access is unnecessary.</li>
+        <li><strong>Avoid exposing the daemon over TCP.</strong> If you must, require mTLS and strict ACLs.</li>
+        <li><strong>Audit who can call Docker APIs</strong> (CI agents, runners, orchestration services).</li>
+    </ul>
+
+    <h4>Container runtime (<code>containerd</code>, <code>runc</code>) — where the kernel gets invoked</h4>
+    <p>How it works</p>
+    <ul>
+        <li><code>containerd</code> is the longer-lived runtime manager; <code>runc</code> is a minimal runtime that performs the syscalls to create namespaces, cgroups, mounts and eventually execute your process.</li>
+        <li><code>runc</code> essentially does the <code>clone(2)</code>/<code>unshare(2)</code>/<code>setns(2)</code> plumbing and then execs the process in the new namespaces.</li>
+    </ul>
+
+    <p>How it’s abused</p>
+    <ul>
+        <li><strong>Runtime vulnerabilities:</strong> Bugs in <code>runc</code> or the runtime glue (race conditions, file-descriptor leaks, incorrect path handling) can be used to trick the runtime into mounting or writing host paths, overwriting runtime binaries, or gaining elevated privileges.</li>
+        <li><strong>Supply-chain/CI build attacks:</strong> If an attacker can control image builds or builder environments, they can craft build-time operations that abuse the runtime (e.g., manipulating working directories or file descriptors) to influence host state.</li>
+    </ul>
+
+    <p>Concrete mechanism (conceptual)</p>
+    <ul>
+        <li>Attackers do not need to "hack the kernel" necessarily — they can exploit <strong>how</strong> the runtime calls the kernel. For example, a crafted sequence that abuses a runc race or a file descriptor handed to runc can cause it to operate on a host path instead of the intended container path.</li>
+    </ul>
+
+    <p>Safe mitigations</p>
+    <ul>
+        <li><strong>Keep runtimes patched</strong> (containerd, runc) — these get CVEs and fixes frequently.</li>
+        <li><strong>Reduce attack surface</strong> with seccomp profiles and LSMs (AppArmor/SELinux).</li>
+        <li><strong>Use intermediate sandboxes</strong> like gVisor or Kata for untrusted code — they insert an extra boundary between user code and the kernel.</li>
+        <li><strong>Harden build pipelines</strong>: run builds in isolated VMs, restrict build-time mounts, and avoid running privileged build containers.</li>
+    </ul>
+
+    <h4>Images & layered filesystems (OverlayFS) — what you pull is what you run</h4>
+    <p>How it works</p>
+    <ul>
+        <li>Images are stacks of immutable layers; when you run a container a writable top layer is added and mounts are configured to assemble the final root filesystem. OverlayFS merges layers efficiently.</li>
+        <li>Registries (Docker Hub, private registries) store images and metadata.</li>
+    </ul>
+
+    <p>How it’s abused</p>
+    <ul>
+        <li><strong>Malicious images / supply chain attacks:</strong> An attacker publishes an image containing malware, trojans, or outdated, vulnerable libraries.</li>
+        <li><strong>Typosquatting or <code>latest</code>-blind pulls:</strong> Relying on <code>:latest</code> or unverified public images lets you pull compromised content accidentally.</li>
+        <li><strong>Image metadata tricks:</strong> Attackers can hide malicious actions in entrypoints or build steps that run at startup.</li>
+    </ul>
+
+    <p>Why it’s dangerous</p>
+    <ul>
+        <li>Once you <code>docker run</code> an image you trust the image’s contents and startup behavior. The image can create privileged processes, write to mounted volumes, or open network callbacks.</li>
+    </ul>
+
+    <p>Safe mitigations</p>
+    <ul>
+        <li><strong>Pin image digest/versions</strong> rather than using <code>:latest</code>.</li>
+        <li><strong>Sign images</strong> and use Docker Content Trust or a private signed registry.</li>
+        <li><strong>Scan images in CI</strong> with Trivy/Clair/Snyk to detect known vulnerabilities.</li>
+        <li><strong>Use minimal base images</strong> and rebuild images from minimal sources you control.</li>
+    </ul>
+
+    <h4>Namespaces & Cgroups — the illusion of separation</h4>
+    <p>How it works</p>
+    <ul>
+        <li><strong>Namespaces</strong> create per-container views (PID, mount, network, user, UTS, IPC). A process in a PID namespace sees its own PID tree.</li>
+        <li><strong>Cgroups</strong> cap and account for resource usage (CPU, memory, blkio, etc.).</li>
+    </ul>
+
+    <p>How it’s abused</p>
+    <ul>
+        <li><strong>Kernel exploits</strong>: namespaces are a visibility boundary; they are not a security boundary against kernel bugs. Privilege escalation bugs in the kernel (or use-after-free, pipe/race issues) can let a process in a namespace affect the global kernel state.</li>
+        <li><strong>Misuse of user namespaces:</strong> when user namespaces are not used, processes inside often map to root on the host (UID 0 inside = UID 0 on host in many setups). That makes container root extremely powerful.</li>
+    </ul>
+
+    <p>Concrete mechanism (conceptual)</p>
+    <ul>
+        <li>A kernel vulnerability that allows arbitrary memory write or improper handling of file descriptors will not respect “namespace separation” — the attacker is running on the same kernel and can manipulate global kernel structures or kernel-managed files (like <code>/proc</code>), leading to escapes.</li>
+    </ul>
+
+    <p>Safe mitigations</p>
+    <ul>
+        <li><strong>Use user namespaces</strong> where feasible so container root is not host root.</li>
+        <li><strong>Avoid <code>--privileged</code></strong> which removes many namespace protections and adds all capabilities.</li>
+        <li><strong>Limit capabilities</strong> with <code>--cap-drop ALL</code> and only add what is needed with <code>--cap-add</code>.</li>
+        <li><strong>Keep kernels patched</strong>; adopt LTS kernels with quick patching workflows.</li>
+    </ul>
+
+    <h4>Mounts and bind mounts — the convenience that bites</h4>
+    <p>How it works</p>
+    <ul>
+        <li>Docker allows you to mount host paths into containers (<code>-v /host/path:/container/path</code>) and mount devices (<code>--device</code>). This is essential for persistence and access to hardware.</li>
+    </ul>
+
+    <p>How it’s abused</p>
+    <ul>
+        <li><strong>Host filesystem access:</strong> Mounting <code>/</code> or <code>/var</code> into a container gives the container direct read/write on host data.</li>
+        <li><strong>Device mounts:</strong> Mapping in devices (e.g., <code>/dev/kvm</code>) can allow code to interact with hardware in ways that allow privilege escalation or kernel attack surfaces.</li>
+    </ul>
+
+    <p>Why it’s dangerous</p>
+    <ul>
+        <li>Bind mounts blur the line between the host and the container; they let the container bypass the "illusion" of a separate filesystem.</li>
+    </ul>
+
+    <p>Safe mitigations</p>
+    <ul>
+        <li><strong>Avoid host-root mounts</strong> unless absolutely necessary. Use managed volumes instead.</li>
+        <li><strong>Mount read-only</strong> where possible (<code>:ro</code>) and restrict which host paths are exposed.</li>
+        <li><strong>Audit CI scripts</strong> and admin helpers that mount the host for debugging — these are common accidental backdoors.</li>
+    </ul>
+
+    <h4>Networking — the shared neighborhood</h4>
+    <p>How it works</p>
+    <ul>
+        <li>Docker by default creates a bridge network (<code>docker0</code>) and attaches containers to it so they can talk to one another and to the outside world.</li>
+        <li>You can create user-defined networks, overlay networks (in swarm/k8s), host networking, or macvlan.</li>
+    </ul>
+
+    <p>How it’s abused</p>
+    <ul>
+        <li><strong>Lateral movement:</strong> If an attacker compromises one container they can scan and reach other containers on the same network.</li>
+        <li><strong>ARP/packet spoofing</strong> on a flat bridge if networks are not isolated.</li>
+        <li><strong>Exposed services:</strong> Containers often expose ports; forgotten open services become attack vectors.</li>
+    </ul>
+
+    <p>Safe mitigations</p>
+    <ul>
+        <li><strong>Use user-defined networks</strong> and segment workloads by security group / network policy.</li>
+        <li><strong>Use network policies</strong> (in Kubernetes) or firewall rules on the host to limit cross-container traffic.</li>
+        <li><strong>Don’t run sensitive services on default bridge;</strong> use host-networking only when explicitly needed and understood.</li>
+    </ul>
+
+    <h4>Practical hardening checklist (commands & patterns)</h4>
+    <ul>
+        <li>Run containers with least privilege:</li>
+    </ul>
+    <pre><code>docker run --rm
+--cap-drop ALL
+--security-opt no-new-privileges:true
+--security-opt seccomp=/path/to/seccomp.json
+--read-only
+-v /data/app: /app:ro
+your/image:tag</code></pre>
+    <ul>
+        <li>Use seccomp and LSMs (AppArmor/SELinux). Start with Docker’s default seccomp and lock it down if necessary.</li>
+        <li>Scan images in CI:</li>
+        <li>Add Trivy or equivalent to your pipeline and fail builds on critical findings.</li>
+        <li>Rootless Docker for dev and CI where possible.</li>
+        <li>Restrict <code>dockerd</code> access — don’t expose the socket, don’t add non-admins to docker group.</li>
+        <li>Use immutable image digests: <code>your/image@sha256:&lt;digest&gt;</code>.</li>
+    </ul>
+
+    <h4>Final, practical thoughts</h4>
+    <p>If you’re trying to protect a host from accidental or malicious containers: treat Docker as a tool that <strong>can</strong> run untrusted code but <strong>must not be trusted by default</strong>. Build layers of protection:</p>
+
+    <ul>
+        <li>secure the <strong>daemon</strong> and access to it,</li>
+        <li>harden the <strong>runtime</strong> (patch, LSM, seccomp),</li>
+        <li>secure the <strong>supply chain</strong> (sign, scan, pin),</li>
+        <li>minimize <strong>host exposure</strong> (no host mounts, avoid privileged),</li>
+        <li>isolate <strong>networking</strong>.</li>
+    </ul>
+
+    <p>If you’re running code you don’t fully control, consider the extra cost of running it inside a VM or a secondary isolation technology (gVisor/Kata) instead of bare Docker.</p>
+
+    <h3>Exploits in the Wild — short catalog</h3>
+    <ul>
+        <li>CVE-2019-5736 (runc): a malicious container can overwrite the host runtime and gain root — because the runtime trusted what the container fed it. <a href="https://nvd.nist.gov/vuln/detail/CVE-2019-5736">NVD: CVE-2019-5736</a> <a href="https://aws.amazon.com/blogs/compute/anatomy-of-cve-2019-5736-a-runc-container-escape/">AWS analysis of CVE-2019-5736</a></li>
+        <li>CVE-2024-21626 (runc): file-descriptor leaks and working-directory mishandling allowed containers to see/operate on host paths during exec/run. <a href="https://scout.docker.com/vulnerabilities/id/CVE-2024-21626">Docker Scout: CVE-2024-21626</a> <a href="https://learn.snyk.io/lesson/cve-2024-21626-runc-process-cwd-container-breakout/">Snyk writeup on CVE-2024-21626</a></li>
+        <li>CVE-2022-0847 (Dirty Pipe): a Linux kernel local-privilege escalation that could be used from inside a container to overwrite host files. Patch the kernel. <a href="httpsD://nvd.nist.gov/vuln/detail/CVE-2022-0847">NVD: CVE-2022-0847 (Dirty Pipe)</a> </li>
+        <li>CVE-2025-31133 / CVE-2025-52565 / CVE-2025-52881 (runc trio): recent high-severity runc vulnerabilities that allow various mount/race/file-descriptor attacks enabling container escape — patch runc/containerd and consider extra sandboxes for untrusted code. <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-31133">NVD: CVE-2025-31133</a></li>
+    </ul>
+
+</body>
+</html>

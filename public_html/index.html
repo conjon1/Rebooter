@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connal J. McInnis | Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Doom-Oceanic-Next Theme */
+        :root {
+            --bg: #1e2127;
+            --bg-alt: #282c34;
+            --fg: #abb2bf;
+            --fg-alt: #5c6370;
+            --primary: #61afef; /* Blue */
+            --secondary: #c678dd; /* Magenta */
+            --accent: #98c379; /* Green */
+            --warning: #d19a66; /* Orange */
+            --error: #e06c75; /* Red */
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom styles for the theme */
+        .bg-main { background-color: var(--bg); }
+        .bg-alt { background-color: var(--bg-alt); }
+        .text-main { color: var(--fg); }
+        .text-alt { color: var(--fg-alt); }
+        .text-primary { color: var(--primary); }
+        .text-secondary { color: var(--secondary); }
+        .text-accent { color: var(--accent); }
+        .border-alt { border-color: var(--fg-alt); }
+        .border-primary { border-color: var(--primary); }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Fira Code', monospace;
+            color: var(--primary);
+        }
+
+        a {
+            color: var(--secondary);
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--primary);
+        }
+
+        /* Animation for sections fading in */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--fg-alt);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* For the typewriter effect */
+        .typewriter-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background-color: var(--primary);
+            animation: blink 0.7s infinite;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+        /* Basic prose styles for post content */
+        .prose h1, .prose h2, .prose h3 { margin-bottom: 1rem; margin-top: 1.5rem; }
+        .prose p { margin-bottom: 1rem; }
+        .prose ul { list-style-position: inside; list-style-type: disc; margin-bottom: 1rem; padding-left: 1rem; }
+        .prose a { color: var(--accent); text-decoration: underline; }
+        .prose pre { white-space: pre-wrap; }
+    </style>
+</head>
+<body class="bg-main text-main antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="bg-alt/80 backdrop-blur-md sticky top-0 z-50 border-b border-alt">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="text-xl font-bold font-mono text-primary">// C.J.McInnis</a>
+            <nav class="hidden md:flex space-x-8 items-center">
+                <a href="#home" class="nav-link text-secondary hover:text-primary transition-colors">Home</a>
+                <a href="#blog" class="nav-link text-secondary hover:text-primary transition-colors">Blog</a>
+                <a href="#resume" class="nav-link text-secondary hover:text-primary transition-colors">Resume</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden text-primary focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4">
+            <a href="#home" class="block py-2 nav-link text-secondary hover:text-primary">Home</a>
+            <a href="#blog" class="block py-2 nav-link text-secondary hover:text-primary">Blog</a>
+            <a href="#resume" class="block py-2 nav-link text-secondary hover:text-primary">Resume</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Home Page -->
+        <section id="home" class="page min-h-screen">
+            <div class="fade-in">
+                <h1 class="text-4xl md:text-6xl font-bold mb-4">Connal J. McInnis</h1>
+                <h2 class="text-2xl md:text-3xl text-secondary mb-8">
+                    <span id="typewriter"></span><span class="typewriter-cursor"></span>
+                </h2>
+                <p class="max-w-3xl text-lg leading-relaxed mb-8">
+                    My career started in professional kitchens and finance before I found my passion in IT. I've built Kubernetes clusters from the ground up, managed enterprise-grade firewalls, and worked extensively with Linux systems. My hands-on technical projects are driven by a genuine interest in automation and security. I enjoy solving complex problems, documenting the solutions, and helping others learn along the way.
+                </p>
+                <div class="flex space-x-4 mb-16">
+                    <a href="https://github.com/conjon1" target="_blank" class="text-accent hover:underline">GitHub</a>
+                    <span class="text-alt">/</span>
+                    <a href="https://www.linkedin.com/in/connalmcinnis/" target="_blank" class="text-accent hover:underline">LinkedIn</a>
+                    <span class="text-alt">/</span>
+                    <a href="https://rebooter.blog" target="_blank" class="text-accent hover:underline">Rebooter.blog</a>
+                </div>
+            </div>
+
+            <div class="fade-in">
+                <h3 class="text-3xl font-bold mb-8 border-b-2 border-primary pb-2">Recent Posts</h3>
+                <div id="recent-posts" class="space-y-6">
+                    <!-- Recent blog posts will be injected here by JS -->
+                </div>
+                 <a href="#blog" class="nav-link inline-block mt-8 text-secondary hover:text-primary transition-transform hover:translate-x-1">View all posts &rarr;</a>
+            </div>
+        </section>
+
+        <!-- Blog Page -->
+        <section id="blog" class="page min-h-screen hidden">
+            <div class="fade-in">
+                <h1 class="text-4xl font-bold mb-12 border-b-2 border-primary pb-4">Blog</h1>
+                <div id="all-posts" class="space-y-10">
+                    <!-- All blog posts will be injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Post View Page -->
+        <section id="post-view" class="page min-h-screen hidden">
+             <div class="fade-in">
+                <a href="#blog" class="nav-link inline-block mb-8 text-secondary hover:text-primary transition-transform hover:-translate-x-1">&larr; Back to all posts</a>
+                <div id="post-view-content" class="prose max-w-none text-main">
+                    <!-- Post content will be injected here by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Resume Page -->
+        <section id="resume" class="page min-h-screen hidden">
+             <div class="fade-in">
+                <div class="flex justify-between items-center mb-12 border-b-2 border-primary pb-4">
+                    <h1 class="text-4xl font-bold">Resume</h1>
+                    <a href="Connal J. Mcinnis.pdf" download="Connal_J_McInnis_Resume.pdf" class="bg-secondary text-bg-alt font-bold py-2 px-4 rounded-lg hover:bg-primary transition-colors">Download PDF</a>
+                </div>
+
+                <!-- About Me -->
+                <div class="mb-12">
+                    <h2 class="text-2xl text-secondary font-bold mb-4">About Me</h2>
+                    <p class="text-lg leading-relaxed">My career started in professional kitchens and finance before I found my passion in IT. I've built Kubernetes clusters from the ground up, managed enterprise-grade firewalls, and worked extensively with Linux systems. My hands-on technical projects are driven by a genuine interest in automation and security. I enjoy solving complex problems, documenting the solutions, and helping others learn along the way. My background has taught me how to lead, manage projects, and stay calm under pressure.</p>
+                </div>
+
+                <!-- Skills -->
+                <div class="mb-12">
+                    <h2 class="text-2xl text-secondary font-bold mb-4">Skills</h2>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">C</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Python</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Bash</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Linux</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Kubernetes</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Docker</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Helm</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Networking</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Firewalls</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Active Directory</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Encryption</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Monitoring Stack</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">NIST Understanding</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Threat Modeling</span>
+                        <span class="bg-alt text-accent font-mono py-1 px-3 rounded">Technical Writing</span>
+                        <span class="bg-alt text-primary font-mono py-1 px-3 rounded">Leadership</span>
+                        <span class="bg-alt text-primary font-mono py-1 px-3 rounded">Team Collaboration</span>
+                        <span class="bg-alt text-primary font-mono py-1 px-3 rounded">Problem Solving</span>
+                    </div>
+                </div>
+
+                <!-- Work Experience -->
+                <div class="mb-12">
+                    <h2 class="text-2xl text-secondary font-bold mb-4">Work Experience</h2>
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-xl text-accent font-bold">Self-Employed Bookkeeping Consultant</h3>
+                            <p class="text-alt mb-2">Oakland, CA | Jan 2025 - Present</p>
+                            <ul class="list-disc list-inside text-main space-y-1">
+                                <li>Independently managed full-cycle bookkeeping, payroll, and financial forecasting for multiple local business clients, demonstrating strong project management and client relations skills.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-xl text-accent font-bold">Technical Assistant (Volunteer)</h3>
+                            <p class="text-alt mb-2">BeLoved Asheville, Ashville, NC | Feb 2023 - Present</p>
+                            <ul class="list-disc list-inside text-main space-y-1">
+                                <li>Provided consulting on website design and foundational systems architecture, applying systems thinking to solve practical problems for a non-profit organization.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-xl text-accent font-bold">Finance Assistant</h3>
+                            <p class="text-alt mb-2">Willard Powell: Talent Acquisition, Remote | Aug 2022 - Mar 2023</p>
+                            <ul class="list-disc list-inside text-main space-y-1">
+                                <li>Supported core finance functions, using Excel, Google Sheets and Python for financial modeling, budgeting and payroll.</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <h3 class="text-xl text-accent font-bold">Sous Chef / Kitchen Manager</h3>
+                            <p class="text-alt mb-2">Various Businesses, NC & CA | Jan 2019 - Present</p>
+                            <ul class="list-disc list-inside text-main space-y-1">
+                                <li>Developed strong leadership, team collaboration, Customer Service, and time management skills while managing operations in fast-paced, high-pressure environments.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Projects -->
+                 <div class="mb-12">
+                    <h2 class="text-2xl text-secondary font-bold mb-4">Personal Projects</h2>
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-xl text-accent font-bold">Kubernetes Cluster Design & Administration</h3>
+                            <ul class="list-disc list-inside text-main space-y-1">
+                                <li>Designed and built multiple Kubernetes clusters from scratch using Ubuntu Server (with LUKS encryption).</li>
+                                <li>Used Helm charts and custom YAML manifests, configuring Traefik as the Ingress controller for service exposure.</li>
+                                <li>Implemented a monitoring stack with Prometheus and Grafana for cluster-wide insights.</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <h3 class="text-xl text-accent font-bold">Network Security & Infrastructure Management</h3>
+                            <ul class="list-disc list-inside text-main space-y-1">
+                                <li>OPNsense firewall on a dedicated appliance to secure the home network, authoring detailed firewall rules and configuring Unbound DNS for enhanced security and utilizing VLANS for network segmentation.</li>
+                                <li>Explored Intrusion Detection System (IDS) capabilities using Snort to actively analyze and monitor network traffic for threats.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-xl text-accent font-bold">Building my Own Split Keyboard</h3>
+                             <ul class="list-disc list-inside text-main space-y-1">
+                                <li>Soldered and put together a Corne v4 Split Keyboard from parts, Flashed and installed QMK Firmware.</li>
+                                <li>Made a Faraday Case for it due to the controller being sensitive to EM Fields.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education & Certifications -->
+                <div>
+                    <h2 class="text-2xl text-secondary font-bold mb-4">Education & Certifications</h2>
+                     <div class="space-y-4">
+                        <div>
+                            <h3 class="text-xl text-accent font-bold">Bachelor of Science in Information Technology and Cyber Security</h3>
+                            <p class="text-alt">WGU | 2024-2026</p>
+                        </div>
+                         <div>
+                            <h3 class="text-xl text-accent font-bold">Associate in Applied Science, Accounting and Business Administration</h3>
+                            <p class="text-alt">MTCC | 2018 - 2020</p>
+                        </div>
+                         <div>
+                            <h3 class="text-xl text-accent font-bold">Google Cyber-security Certification</h3>
+                        </div>
+                        <div>
+                            <h3 class="text-xl text-accent font-bold">Introduction to IT Architecture</h3>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-alt mt-20">
+        <div class="container mx-auto px-6 py-8 text-center text-alt">
+            <p>&copy; 2025 Connal J. McInnis. Built with a love for open-source.</p>
+        </div>
+    </footer>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        let allPostsData = [];
+
+        // --- Element selectors ---
+        const recentPostsContainer = document.getElementById('recent-posts');
+        const allPostsContainer = document.getElementById('all-posts');
+        const postViewContentContainer = document.getElementById('post-view-content');
+        const pages = document.querySelectorAll('.page');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        // --- Fetch posts from our generated posts.json file ---
+        async function fetchPosts() {
+            try {
+                // We add a cache-busting query parameter to ensure we always get the latest version
+                const response = await fetch(`/posts.json?v=${new Date().getTime()}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const posts = await response.json();
+                allPostsData = posts || [];
+                populatePosts();
+            } catch (error) {
+                console.error("Could not fetch posts.json:", error);
+                recentPostsContainer.innerHTML = "<p class='text-alt'>Could not load recent posts. Make sure posts.json exists and the build script has run.</p>";
+                allPostsContainer.innerHTML = "<p class='text-alt'>Could not load posts.</p>";
+            }
+        }
+
+        // --- Function to create post HTML elements ---
+        function createPostElement(post) {
+            const article = document.createElement('article');
+            article.innerHTML = `
+                <div class="group">
+                    <p class="text-sm text-alt mb-1">${post.date}</p>
+                    <h3 class="text-2xl font-bold text-accent group-hover:text-secondary transition-colors">${post.title}</h3>
+                    <p class="mt-2 text-main">${post.excerpt}</p>
+                    <button data-post-url="${post.url}" class="read-more-btn mt-4 inline-block text-secondary font-semibold hover:text-primary transition-transform group-hover:translate-x-1">Read More &rarr;</button>
+                </div>
+            `;
+            return article;
+        }
+        
+        // --- Populate Blog Sections ---
+        function populatePosts() {
+            if (!allPostsData || allPostsData.length === 0) {
+                recentPostsContainer.innerHTML = '<p class="text-alt">No posts yet. Stay tuned!</p>';
+                allPostsContainer.innerHTML = '<p class="text-alt">No posts yet. Stay tuned!</p>';
+                return;
+            }
+
+            recentPostsContainer.innerHTML = '';
+            allPostsContainer.innerHTML = '';
+
+            // Populate Recent Posts (latest 3)
+            allPostsData.slice(0, 3).forEach(post => {
+                recentPostsContainer.appendChild(createPostElement(post));
+            });
+
+            // Populate All Posts
+            allPostsData.forEach(post => {
+                allPostsContainer.appendChild(createPostElement(post));
+            });
+
+            // Add event listeners to "Read More" buttons
+            document.querySelectorAll('.read-more-btn').forEach(button => {
+                button.addEventListener('click', handleReadMoreClick);
+            });
+        }
+        
+        // --- Post Loading and Display ---
+        async function showPostByUrl(postUrl) {
+            if (!postUrl) {
+                 postViewContentContainer.innerHTML = '<p>Error: Post URL not provided.</p>';
+                 return;
+            }
+            postViewContentContainer.innerHTML = '<p class="text-center text-lg">Loading post...</p>'; // Loading state
+            try {
+                const response = await fetch(postUrl);
+                if (!response.ok) throw new Error(`Post not found at ${postUrl}`);
+                const postHtml = await response.text();
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(postHtml, 'text/html');
+                const postBody = doc.body.innerHTML;
+                
+                postViewContentContainer.innerHTML = postBody;
+            } catch (error) {
+                console.error("Could not load post content:", error);
+                postViewContentContainer.innerHTML = `<p class="text-center text-error">Error: Post content could not be loaded. ${error.message}</p>`;
+            }
+        }
+
+        // --- Handle "Read More" click ---
+        function handleReadMoreClick(event) {
+            const postUrl = event.target.dataset.postUrl;
+            if (!postUrl) return;
+
+            const postId = postUrl.split('/').pop().replace('.html', '');
+            window.location.hash = `post/${postId}`;
+        }
+
+        // --- SPA Routing ---
+        async function handleRouting() {
+            const hash = window.location.hash || '#home';
+            let targetId;
+
+            // Determine which page to show based on the URL hash
+            if (hash.startsWith('#post/')) {
+                targetId = 'post-view';
+                const postId = hash.substring(6); // Get everything after '#post/'
+                if (postId) {
+                    const postUrl = `posts/${postId}.html`;
+                    await showPostByUrl(postUrl); // Load the post content
+                } else {
+                     postViewContentContainer.innerHTML = '<p class="text-error">Error: Invalid post ID.</p>';
+                }
+            } else {
+                targetId = hash.substring(1) || 'home';
+            }
+
+            // Show the target page and hide others
+            pages.forEach(page => {
+                if (page.id === targetId) {
+                    page.classList.remove('hidden');
+                    // Trigger fade-in for the newly visible page's elements
+                    page.querySelectorAll('.fade-in').forEach(el => {
+                        setTimeout(() => el.classList.add('visible'), 50);
+                    });
+                } else {
+                    page.classList.add('hidden');
+                }
+            });
+            window.scrollTo(0, 0);
+        }
+
+        // Attach routing handlers
+        window.addEventListener('hashchange', handleRouting);
+        
+        // Modify nav link behavior to use the router
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetHash = new URL(link.href).hash;
+                
+                if (window.location.hash !== targetHash) {
+                    window.location.hash = targetHash;
+                } else {
+                    window.scrollTo(0, 0); // Scroll to top if already on the page
+                }
+                
+                // Hide mobile menu if open
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Fade-in on Scroll Effect ---
+        const faders = document.querySelectorAll('.fade-in');
+        const appearOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
+        const appearOnScroll = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            });
+        }, appearOptions);
+        faders.forEach(fader => appearOnScroll.observe(fader));
+
+        // --- Typewriter Effect ---
+        const typewriterElement = document.getElementById('typewriter');
+        const roles = ["IT Specialist", "Kubernetes Enthusiast", "Linux Advocate", "Cybersecurity Student"];
+        let roleIndex = 0, charIndex = 0, isDeleting = false;
+
+        function type() {
+            const currentRole = roles[roleIndex];
+            if (isDeleting) {
+                typewriterElement.textContent = currentRole.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typewriterElement.textContent = currentRole.substring(0, charIndex + 1);
+                charIndex++;
+            }
+            if (!isDeleting && charIndex === currentRole.length) {
+                setTimeout(() => isDeleting = true, 2000);
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                roleIndex = (roleIndex + 1) % roles.length;
+            }
+            const typeSpeed = isDeleting ? 100 : 150;
+            setTimeout(type, typeSpeed);
+        }
+        
+        // --- Initialize page content ---
+        fetchPosts();
+        handleRouting(); // Handle initial page load (e.g., from a direct link to a post)
+        type();
+
+    });
+    </script>
+</body>
+</html>

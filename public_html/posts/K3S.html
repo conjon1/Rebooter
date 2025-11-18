@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--
+      METADATA FOR THE BUILD SCRIPT
+      The Go script looks for these meta tags to generate posts.json.
+    -->
+    <title>My Homelab Journey: From Mini PCs to Kubernetes with K3s</title>
+    <meta name="date" content="October 20, 2025">
+    <meta name="excerpt" content="From a few mini PCs to a fully functional Kubernetes cluster – my homelab journey using Ubuntu and K3s has been full of learning experiences.">
+
+    <style>
+        /* A little bit of basic styling for the post content */
+        body { 
+            line-height: 1.6; 
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        h1, h2, h3 { line-height: 1.2; margin-top: 1.5em; }
+        code { 
+            background-color: #333; 
+            color: #f1f1f1;
+            padding: 2px 5px; 
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+        }
+        pre { 
+            background-color: #282c34; 
+            color: #abb2bf;
+            padding: 1em; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        strong {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- The rest of this is your visible post content -->
+    <h1>My Homelab Journey: From Mini PCs to Kubernetes with K3s</h1>
+    <p><strong>From a few mini PCs to a fully functional Kubernetes cluster – my homelab journey using Ubuntu and K3s has been full of learning experiences (and a few headaches!).</strong></p>
+
+    <h2>Motivation: The Pull of Automation</h2>
+    <p>I've always been drawn to automation and building effective, interconnected systems. This interest was likely first sparked by games like Minecraft with its automatic farms, and later solidified by titles like Factorio and Mindustry. In Factorio, in particular, you design intricate, interconnected factories to automate production towards launching a rocket – it’s incredible dopamine, like candy for my brain. This love for building complex systems naturally led me to explore the world of container orchestration with Kubernetes.</p>
+
+    <h3>Why K3s?</h3>
+    <p>When I discovered K3s, I was immediately interested. It seemed like a great starting point: providing a solid Kubernetes foundation that was relatively easy to set up but didn't abstract away too much, unlike options like MicroK8s from Canonical. I didn't want it to be overly simplified; I wanted the challenge of navigating some complexities myself to gain a deeper understanding of the technology. In the future, I might consider migrating the cluster to Talos Linux for its immutable, API-driven approach, likely paired with standard K8s (Kubernetes).</p>
+
+    <h3>The Hardware</h3>
+    <p>For my Kubernetes homelab, I chose 3x Beelink EQ12 mini PCs. These compact machines offered the perfect blend of low power consumption and sufficient processing power for my current and future experiments.</p>
+
+
+    <h4>Specifications</h4>
+    <ul>
+        <li><strong>Processor:</strong> Each unit features an efficient Intel processor.</li>
+        <li><strong>RAM:</strong> 24GB DDR5 RAM per unit.</li>
+        <li><strong>Storage:</strong> 500GB NVMe SSD per unit.</li>
+    </ul>
+
+    <h4>Low Power Consumption</h4>
+    <p>Since the cluster runs 24/7, minimizing energy usage was crucial for keeping operating costs manageable.</p>
+
+    <h4>Future-Proofing (to a degree)</h4>
+    <p>While not high-end servers, these mini PCs provide enough resources to run various Kubernetes workloads and explore different configurations.</p>
+
+    <h4>Processing Power</h4>
+    <p>Each machine provides 10 Cores / 12 Threads. Across the three nodes, this gives a total of 30 cores and 36 threads, which is a decent amount of processing power for this learning project.</p>
+
+    <h4>Node Count</h4>
+    <p>I opted for three nodes to build a more resilient setup. This allows me to experiment with concepts like high availability, although with K3s's embedded database, it's often more about having dedicated worker nodes alongside the control plane.</p>
+
+    <h4>Networking</h4>
+    <p>The nodes are connected using a basic Gigabit Ethernet switch.</p>
+
+    <h2>The Operating System: Ubuntu with a Security Twist</h2>
+    <p>Initially, I tried running Talos Linux, but I quickly realized I was a bit out of my depth. Getting the system configured exactly as I wanted proved challenging (mostly user error, honestly!). I also considered Arch Linux, but having used it as my primary desktop OS for years, I anticipated potential maintenance headaches down the line when obscure problems inevitably arise.</p>
+    <p>So, I turned my attention to Debian-based systems, and Ubuntu immediately came to mind. I have experience with the apt package manager, and Debian/Ubuntu are known for being significantly more stable than Arch for server environments.</p>
+    <p>For added security, I opted for LUKS full-disk encryption on each node. The initial drawback is needing to enter the decryption passphrase manually on each machine during boot, which is cumbersome. As a temporary workaround, before I potentially set up automated network-bound unlocking (perhaps using a Tang server), I'm using a Bluetooth keyboard capable of switching between the three machines. It's a simple but effective fix for now!</p>
+
+    <h2>Getting Hands-On: Installing K3s on Ubuntu</h2>
+    <p>With the hardware chosen and Ubuntu Server 24.04.2 LTS installed on my three "honey" nodes (yes, sticking with the bee theme thanks to the Beelink hardware), it was time to dive into the K3s installation.</p>
+
+    <h3>Disabling the Firewall</h3>
+    <p>Ubuntu Server comes with ufw (Uncomplicated Firewall) enabled by default. I SSH'd into each node and disabled it with:</p>
+    <pre><code>sudo ufw disable
+sudo systemctl disable ufw</code></pre>
+
+    <h3>Installing the K3s Control Plane (on honey1)</h3>
+    <p>I started by installing the K3s server component on <code>honey1</code>:</p>
+    <pre><code>curl -sfL https://get.k3s.io | sh -</code></pre>
+    <p>After installation, I retrieved the node token from:</p>
+    <pre><code>sudo cat /etc/rancher/k3s/k3s.yaml</code></pre>
+
+    <h3>Joining the Worker Nodes (honey2 & honey3)</h3>
+    <p>Next, I SSH'd into <code>honey2</code> and <code>honey3</code> and used the installation script again, providing the control plane's URL and token:</p>
+    <pre><code>curl -sfL https://get.k3s.io | K3S_URL=https://&lt;honey1-ip&gt;:6443 K3S_TOKEN=&lt;your-token&gt; sh -</code></pre>
+
+    <h3>Setting up kubectl on Your Host Machine</h3>
+    <ol>
+        <li><strong>Copy K3s Config:</strong> Copy the entire contents of the <code>/etc/rancher/k3s/k3s.yaml</code> file from <code>honey1</code>.</li>
+        <li><strong>Create Local Config:</strong> On my Arch Linux workstation, I created the config file:
+            <pre><code>mkdir -p ~/.kube
+nano ~/.kube/config</code></pre>
+        </li>
+        <li><strong>Paste and Modify:</strong> I pasted the copied content and changed the server address from <code>https://127.0.0.1:6443</code> to <code>https://&lt;honey1-ip&gt;:6443</code>.</li>
+    </ol>
+    <p>After saving, I could run <code>kubectl get nodes</code> and see all three nodes ready!</p>
+
+    <h2>Monitoring with Prometheus & Grafana</h2>
+    <p>With the cluster running, the next step was setting up a monitoring stack using Prometheus and Grafana via a Helm chart.</p>
+
+    <h3>Installation via Helm</h3>
+    <p>First, I added the Prometheus community Helm repository:</p>
+    <pre><code>helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update</code></pre>
+    <p>Then, I installed the stack into its own namespace:</p>
+    <pre><code>helm install prometheus-stack prometheus-community/kube-prometheus-stack \
+  --namespace=prometheus-stack \
+  --create-namespace</code></pre>
+
+    <h3>Making Access Easier: NodePort and Ingress</h3>
+    <p>To access Grafana from my local network, I created two Kubernetes objects:</p>
+    <ol>
+        <li>A <strong>Service</strong> of type <code>NodePort</code> to expose the Grafana deployment.</li>
+        <li>An <strong>IngressRoute</strong> for Traefik to route a hostname like <code>grafana.local</code> to the service.</li>
+    </ol>
+    <p>Here's the YAML I used:</p>
+    <pre><code># grafana-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-service
+  namespace: prometheus-stack
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: grafana
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+      nodePort: 30001</code></pre>
+
+    <pre><code># grafana-ingressroute.yaml
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana-ingressroute
+  namespace: prometheus-stack
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`grafana.local`)
+      kind: Rule
+      services:
+        - name: grafana-service
+          port: 3000</code></pre>
+    <p>After applying these files with <code>kubectl apply -f .</code>, I could access the Grafana dashboard at <code>http://grafana.local</code> in my browser. Much easier!</p>
+
+</body>
+</html>
