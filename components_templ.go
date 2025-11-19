@@ -81,7 +81,7 @@ func Index(posts []Post) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a><nav class=\"hidden md:flex space-x-8 items-center\"><a href=\"#home\" class=\"nav-link hover:text-[#61afef] transition-colors\">Home</a> <a href=\"#blog\" class=\"nav-link hover:text-[#61afef] transition-colors\">Blog</a> <a href=\"#authors\" class=\"nav-link hover:text-[#61afef] transition-colors\">Authors</a></nav><button id=\"mobile-menu-btn\" class=\"md:hidden text-[#abb2bf] hover:text-[#61afef] focus:outline-none\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h16m-7 6h7\"></path></svg></button></div><div id=\"mobile-menu\" class=\"hidden md:hidden bg-[#282c34] border-b border-[#5c6370]\"><nav class=\"flex flex-col px-6 py-4 space-y-4\"><a href=\"#home\" class=\"mobile-link hover:text-[#61afef] transition-colors\">Home</a> <a href=\"#blog\" class=\"mobile-link hover:text-[#61afef] transition-colors\">Blog</a> <a href=\"#authors\" class=\"mobile-link hover:text-[#61afef] transition-colors\">Authors</a></nav></div></header><main class=\"container mx-auto px-6 py-12\"><section id=\"home\" class=\"page min-h-screen\"><div class=\"fade-in\"><h1 class=\"text-4xl md:text-6xl font-bold mb-4 text-[#61afef]\">Rebooter</h1><h2 class=\"text-2xl md:text-3xl text-[#c678dd] mb-8\"><span id=\"typewriter\"></span><span class=\"cursor\"></span></h2><p class=\"max-w-3xl text-lg leading-relaxed mb-16\">Runtime error: Career path not found. System reboot initiated... Success. We are a group of students redefining our trajectories. Here, we explore the intersection of our past experiences and our future in high-availability systems, cybersecurity, and code.</p></div><div class=\"fade-in mt-12\"><h3 class=\"text-3xl font-bold mb-8 border-b-2 border-[#61afef] pb-2\">Recent Posts</h3><div class=\"space-y-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</a><nav class=\"hidden md:flex space-x-8 items-center\"><a href=\"#home\" class=\"nav-link hover:text-[#61afef] transition-colors\">Home</a> <a href=\"#blog\" class=\"nav-link hover:text-[#61afef] transition-colors\">Blog</a> <a href=\"#authors\" class=\"nav-link hover:text-[#61afef] transition-colors\">Authors</a></nav><button id=\"mobile-menu-btn\" class=\"md:hidden text-[#abb2bf] hover:text-[#61afef] focus:outline-none\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h16m-7 6h7\"></path></svg></button></div><div id=\"mobile-menu\" class=\"hidden md:hidden bg-[#282c34] border-b border-[#5c6370]\"><nav class=\"flex flex-col px-6 py-4 space-y-4\"><a href=\"#home\" class=\"mobile-link hover:text-[#61afef] transition-colors\">Home</a> <a href=\"#blog\" class=\"mobile-link hover:text-[#61afef] transition-colors\">Blog</a> <a href=\"#authors\" class=\"mobile-link hover:text-[#61afef] transition-colors\">Authors</a></nav></div></header><main class=\"container mx-auto px-6 py-12\"><section id=\"home\" class=\"page min-h-screen\"><div class=\"fade-in\"><h1 class=\"text-4xl md:text-6xl font-bold mb-4 text-[#61afef]\">Rebooter</h1><h2 class=\"text-2xl md:text-3xl text-[#c678dd] mb-8\"><span id=\"typewriter\"></span><span class=\"cursor\"></span></h2><p class=\"max-w-3xl text-lg leading-relaxed mb-16\">Still figuring this part out....</p></div><div class=\"fade-in mt-12\"><h3 class=\"text-3xl font-bold mb-8 border-b-2 border-[#61afef] pb-2\">Recent Posts</h3><div class=\"space-y-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -120,7 +120,7 @@ func Index(posts []Post) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(author.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 169, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 168, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -133,7 +133,7 @@ func Index(posts []Post) templ.Component {
 			var templ_7745c5c3_Var4 templ.SafeURL
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(author.Github))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 171, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 170, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -146,7 +146,7 @@ func Index(posts []Post) templ.Component {
 			var templ_7745c5c3_Var5 templ.SafeURL
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(author.Linkedin))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 173, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 172, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -159,7 +159,7 @@ func Index(posts []Post) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(author.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 177, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 176, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -224,7 +224,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(post.Date)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 363, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 362, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -237,7 +237,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 365, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 364, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -250,7 +250,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(post.Excerpt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 367, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 366, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -263,7 +263,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var11 templ.SafeURL
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("#post/%s", post.ID)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 368, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 367, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
