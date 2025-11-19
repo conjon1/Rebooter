@@ -1,15 +1,17 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/html"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
+
+	"golang.org/x/net/html"
 )
 
 type Post struct {
@@ -18,50 +20,61 @@ type Post struct {
 	Date    string `json:"date"`
 	Excerpt string `json:"excerpt"`
 	URL     string `json:"url"`
+	Author  string `json:"author"`
 }
 
 const (
 	postsDir   = "public_html/posts"
-	outputFile = "public_html/posts.json"
+	jsonOutput = "public_html/posts.json"
+	htmlOutput = "public_html/index.html"
 	dateFormat = "January 2, 2006"
 )
 
 func main() {
-	log.Println("Starting blog post build process...")
+	log.Println(" Starting blog build process...")
 
 	posts, err := findAndParsePosts(postsDir)
 	if err != nil {
-		log.Fatalf("Error finding or parsing posts: %v", err)
+		log.Fatalf("Error parsing posts: %v", err)
 	}
 
 	sortPostsByDate(posts)
 
-	err = writePostsJSON(posts, outputFile)
-	if err != nil {
-		log.Fatalf("Error writing JSON file: %v", err)
+	if err := writePostsJSON(posts, jsonOutput); err != nil {
+		log.Printf("Warning: Could not write JSON: %v", err)
 	}
 
-	log.Printf("\n Success! Created %s with %d posts.", outputFile, len(posts))
+	f, err := os.Create(htmlOutput)
+	if err != nil {
+		log.Fatalf("Error creating index.html: %v", err)
+	}
+	defer f.Close()
+
+	// Render the Index component with the posts data
+	err = Index(posts).Render(context.Background(), f)
+	if err != nil {
+		log.Fatalf(" Error rendering template: %v", err)
+	}
+
+	log.Printf("\n Nooice! Built site with %d posts.", len(posts))
 }
+
 
 func findAndParsePosts(dir string) ([]Post, error) {
 	var posts []Post
-	files, err := os.ReadDir(dir)
+	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, fmt.Errorf("could not read posts directory '%s': %w", dir, err)
+		return nil, err
 	}
 
-	log.Println("Scanning for posts in", dir)
-	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".html") {
-			filePath := filepath.Join(dir, file.Name())
-			post, err := parsePostHTML(filePath)
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".html") {
+			post, err := parsePostHTML(filepath.Join(dir, entry.Name()))
 			if err != nil {
-				log.Printf(" you done fuckd up  Skipping %s: could not parse metadata: %v", file.Name(), err)
+				log.Printf("Skipping %s: %v", entry.Name(), err)
 				continue
 			}
 			posts = append(posts, post)
-			log.Printf("  - Found and parsed: %s", file.Name())
 		}
 	}
 	return posts, nil
@@ -69,81 +82,65 @@ func findAndParsePosts(dir string) ([]Post, error) {
 
 func sortPostsByDate(posts []Post) {
 	sort.Slice(posts, func(i, j int) bool {
-		t1, err := time.Parse(dateFormat, posts[i].Date)
-		if err != nil {
-			// Fail loudly
-			log.Fatalf("FATAL: Could not parse date '%s' for post '%s'. Please use '%s' format. Error: %v", posts[i].Date, posts[i].Title, dateFormat, err)
-		}
-		t2, err := time.Parse(dateFormat, posts[j].Date)
-		if err != nil {
-			log.Fatalf("FATAL: Could not parse date '%s' for post '%s'. Please use '%s' format. Error: %v", posts[j].Date, posts[j].Title, dateFormat, err)
-		}
+		t1, _ := time.Parse(dateFormat, posts[i].Date)
+		t2, _ := time.Parse(dateFormat, posts[j].Date)
 		return t1.After(t2)
 	})
 }
 
 func writePostsJSON(posts []Post, path string) error {
-	jsonData, err := json.MarshalIndent(posts, "", "  ")
+	data, err := json.MarshalIndent(posts, "", "  ")
 	if err != nil {
-		return fmt.Errorf("could not marshal posts to JSON: %w", err)
+		return err
 	}
-	err = os.WriteFile(path, jsonData, 0644)
-	if err != nil {
-		return fmt.Errorf("could not write to file '%s': %w", path, err)
-	}
-	return nil
+	return os.WriteFile(path, data, 0644)
 }
 
-func parsePostHTML(filePath string) (Post, error) {
-	file, err := os.Open(filePath)
+func parsePostHTML(path string) (Post, error) {
+	f, err := os.Open(path)
 	if err != nil {
 		return Post{}, err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	doc, err := html.Parse(file)
+	doc, err := html.Parse(f)
 	if err != nil {
 		return Post{}, err
 	}
 
 	var post Post
-	post.ID = strings.TrimSuffix(filepath.Base(filePath), ".html")
-	post.URL = fmt.Sprintf("posts/%s", filepath.Base(filePath))
+	post.ID = strings.TrimSuffix(filepath.Base(path), ".html")
+	post.URL = fmt.Sprintf("posts/%s", filepath.Base(path))
 
-	var f func(*html.Node)
-	f = func(n *html.Node) {
+	var crawler func(*html.Node)
+	crawler = func(n *html.Node) {
 		if n.Type == html.ElementNode {
-			switch n.Data {
-			case "title":
-				if n.FirstChild != nil {
-					post.Title = strings.TrimSpace(n.FirstChild.Data)
-				}
-			case "meta":
-				var name, content string
+			if n.Data == "title" && n.FirstChild != nil {
+				post.Title = n.FirstChild.Data
+			} else if n.Data == "meta" {
+				name, content := "", ""
 				for _, a := range n.Attr {
-					if a.Key == "name" {
-						name = a.Val
-					}
-					if a.Key == "content" {
-						content = a.Val
-					}
+					if a.Key == "name" { name = a.Val }
+					if a.Key == "content" { content = a.Val }
 				}
-				switch name {
-				case "date":
-					post.Date = content
-				case "excerpt":
-					post.Excerpt = content
-				}
+				if name == "date" { post.Date = content }
+				if name == "excerpt" { post.Excerpt = content }
+				if name == "author" { post.Author = content }
 			}
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			f(c)
+			crawler(c)
 		}
 	}
-	f(doc)
+	crawler(doc)
 
-	if post.Title == "" || post.Date == "" || post.Excerpt == "" {
-		return Post{}, fmt.Errorf("missing required metadata (title, date, or excerpt)")
+	if post.Title == "" || post.Date == "" {
+		return Post{}, fmt.Errorf("missing title or date metadata")
+	}
+
+	// Default author if not specified
+	if post.Author == "" {
+		post.Author = "Connal McInnis"
 	}
 
 	return post, nil

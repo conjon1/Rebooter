@@ -1,0 +1,324 @@
+package main
+
+import "fmt"
+
+type AuthorData struct {
+	Name     string
+	Linkedin string
+	Github   string
+}
+
+var authors = []AuthorData{
+	{
+		Name:     "Connal McInnis",
+		Linkedin: "https://www.linkedin.com/in/connalmcinnis/",
+		Github:   "https://github.com/conjon1",
+	},
+	{
+		Name:     "Keshav Italia",
+		Linkedin: "https://www.linkedin.com/in/keshav-italia-151b74171/",
+		Github:   "https://github.com/Keshav25",
+	},
+}
+
+// Helper to slice posts for the "Recent" section safely
+func getRecent(posts []Post, count int) []Post {
+	if len(posts) < count {
+		return posts
+	}
+	return posts[:count]
+}
+
+func getPostsByAuthor(posts []Post, authorName string) []Post {
+	var ap []Post
+	for _, p := range posts {
+		if p.Author == authorName {
+			ap = append(ap, p)
+		}
+	}
+	return ap
+}
+
+templ Index(posts []Post) {
+	<!DOCTYPE html>
+	<html lang="en" class="scroll-smooth">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>Rebooter | Blog</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link rel="preconnect" href="https://fonts.googleapis.com"/>
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+		<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
+		<style>
+			:root {
+				--bg: #1e2127; --bg-alt: #282c34; --fg: #abb2bf; --fg-alt: #5c6370;
+				--primary: #61afef; --secondary: #c678dd; --accent: #98c379;
+				--warning: #d19a66; --error: #e06c75;
+			}
+			body { background-color: var(--bg); color: var(--fg); font-family: 'Inter', sans-serif; }
+			h1, h2, h3, h4, h5, h6, .font-mono { font-family: 'Fira Code', monospace; }
+			.fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+			.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+			/* Typewriter cursor */
+			.cursor { display: inline-block; width: 8px; height: 1.2em; background-color: var(--primary); animation: blink 0.7s infinite; vertical-align: middle; }
+			@keyframes blink { 50% { opacity: 0; } }
+
+			/* Markdown/Post Content Styling */
+			.prose h1 { font-size: 2rem; color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem; }
+			.prose h2 { font-size: 1.5rem; color: var(--secondary); margin-top: 1.5rem; margin-bottom: 0.75rem; }
+			.prose h3 { font-size: 1.25rem; color: var(--accent); margin-top: 1.5rem; margin-bottom: 0.5rem; }
+			.prose p { margin-bottom: 1rem; line-height: 1.7; }
+			.prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+			.prose pre { background: var(--bg-alt); padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }
+			.prose code { font-family: 'Fira Code', monospace; background: #2c313a; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; }
+			.prose a { color: var(--secondary); text-decoration: underline; }
+			.prose blockquote { border-left: 4px solid var(--fg-alt); padding-left: 1rem; font-style: italic; color: var(--fg-alt); }
+		</style>
+	</head>
+	<body class="bg-[#1e2127] text-[#abb2bf] antialiased">
+
+		<header class="bg-[#282c34]/80 backdrop-blur-md sticky top-0 z-50 border-b border-[#5c6370]">
+			<div class="container mx-auto px-6 py-4 flex justify-between items-center">
+				<a href="#home" class="text-xl font-bold font-mono text-[#61afef]">{ "// Rebooter" }</a>
+				<nav class="hidden md:flex space-x-8 items-center">
+					<a href="#home" class="nav-link hover:text-[#61afef] transition-colors">Home</a>
+					<a href="#blog" class="nav-link hover:text-[#61afef] transition-colors">Blog</a>
+					<a href="#authors" class="nav-link hover:text-[#61afef] transition-colors">Authors</a>
+				</nav>
+			</div>
+		</header>
+
+		<main class="container mx-auto px-6 py-12">
+			<section id="home" class="page min-h-screen">
+				<div class="fade-in">
+					<h1 class="text-4xl md:text-6xl font-bold mb-4 text-[#61afef]">Rebooter</h1>
+					<h2 class="text-2xl md:text-3xl text-[#c678dd] mb-8">
+						<span id="typewriter"></span><span class="cursor"></span>
+					</h2>
+					<p class="max-w-3xl text-lg leading-relaxed mb-16">
+						My career started in professional kitchens and finance before I found my passion in IT.
+						I've built Kubernetes clusters from the ground up, managed enterprise-grade firewalls, and worked extensively with Linux systems.
+					</p>
+					</div>
+
+				<div class="fade-in mt-12">
+					<h3 class="text-3xl font-bold mb-8 border-b-2 border-[#61afef] pb-2">Recent Posts</h3>
+					<div class="space-y-6">
+						if len(posts) == 0 {
+							<p class="text-[#5c6370]">No posts found.</p>
+						} else {
+							for _, post := range getRecent(posts, 3) {
+								@PostItem(post)
+							}
+						}
+					</div>
+					<a href="#blog" class="nav-link inline-block mt-8 text-[#c678dd] hover:text-[#61afef] transition-transform hover:translate-x-1">View all posts &rarr;</a>
+				</div>
+			</section>
+
+			<section id="blog" class="page min-h-screen hidden">
+				<div class="fade-in">
+					<h1 class="text-4xl font-bold mb-12 border-b-2 border-[#61afef] pb-4">Blog</h1>
+
+					<div class="mb-8">
+						<input type="text" id="post-search" placeholder="Filter posts..."
+							class="w-full md:w-1/2 bg-[#282c34] border border-[#5c6370] text-[#abb2bf] px-4 py-2 rounded focus:outline-none focus:border-[#61afef] transition-colors placeholder-gray-500"/>
+					</div>
+
+					<div id="all-posts" class="space-y-10">
+						for _, post := range posts {
+							@PostItem(post)
+						}
+					</div>
+				</div>
+			</section>
+
+			<section id="post-view" class="page min-h-screen hidden">
+				<div class="fade-in">
+					<button id="back-btn" class="mb-8 text-[#c678dd] hover:text-[#61afef] transition-transform hover:-translate-x-1">&larr; Back to Blog</button>
+					<div id="post-content" class="prose max-w-none">
+						</div>
+				</div>
+			</section>
+
+			<section id="authors" class="page min-h-screen hidden">
+				<div class="fade-in">
+					<h1 class="text-4xl font-bold mb-12 border-b-2 border-[#61afef] pb-4">Authors</h1>
+
+					<div class="space-y-16">
+						for _, author := range authors {
+							<div class="author-block">
+								<div class="mb-6">
+									<h2 class="text-3xl text-[#c678dd] font-bold mb-2">{ author.Name }</h2>
+									<div class="flex space-x-4 font-mono text-sm">
+										<a href={ templ.SafeURL(author.Github) } target="_blank" class="text-[#98c379] hover:underline">GitHub</a>
+										<span class="text-[#5c6370]">/</span>
+										<a href={ templ.SafeURL(author.Linkedin) } target="_blank" class="text-[#98c379] hover:underline">LinkedIn</a>
+									</div>
+								</div>
+
+								<h3 class="text-xl font-bold text-[#61afef] mb-6">Posts by { author.Name }</h3>
+								<div class="space-y-6 pl-4 border-l-2 border-[#282c34]">
+									if authorPosts := getPostsByAuthor(posts, author.Name); len(authorPosts) > 0 {
+										for _, p := range authorPosts {
+											@PostItem(p)
+										}
+									} else {
+										<p class="text-[#5c6370] italic">No posts published yet.</p>
+									}
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<footer class="border-t border-[#5c6370] mt-20 py-8 text-center text-[#5c6370]">
+			<p>&copy; 2025 Connal J. McInnis. Built with Go & Templ.</p>
+		</footer>
+
+		<script>
+			class BlogApp {
+				constructor() {
+					this.pages = document.querySelectorAll('.page');
+					this.contentDiv = document.getElementById('post-content');
+					this.initRouter();
+					this.initSearch();
+					this.initTypewriter();
+					this.initObservers();
+				}
+
+				// Simple Hash Router
+				initRouter() {
+					window.addEventListener('hashchange', () => this.handleRoute());
+					this.handleRoute();
+
+					document.getElementById('back-btn').addEventListener('click', () => {
+						window.location.hash = '#blog';
+					});
+				}
+
+				async handleRoute() {
+					const hash = window.location.hash || '#home';
+
+					if (hash.startsWith('#post/')) {
+						const postId = hash.replace('#post/', '');
+						await this.loadPost(postId);
+						this.showPage('post-view');
+					} else {
+						this.showPage(hash.replace('#', ''));
+					}
+					window.scrollTo(0,0);
+				}
+
+				showPage(id) {
+					this.pages.forEach(p => {
+						if(p.id === id) {
+							p.classList.remove('hidden');
+							setTimeout(() => {
+								p.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible'));
+							}, 50);
+						} else {
+							p.classList.add('hidden');
+						}
+					});
+				}
+
+				async loadPost(id) {
+					this.contentDiv.innerHTML = '<p class="text-center animate-pulse">Loading content...</p>';
+					try {
+						// Fetch the original HTML file
+						const res = await fetch(`posts/${id}.html`);
+						if(!res.ok) throw new Error('Post not found');
+						const html = await res.text();
+
+						// Parse the HTML to extract just the <body> content
+						const doc = new DOMParser().parseFromString(html, 'text/html');
+
+						// Remove the h1/meta tags if they duplicate what we already have,
+						// or just inject the whole body.
+						// Here we inject everything inside <body>
+						this.contentDiv.innerHTML = doc.body.innerHTML;
+					} catch(e) {
+						this.contentDiv.innerHTML = `<p class="text-[#e06c75]">Error loading post: ${e.message}</p>`;
+					}
+				}
+
+				initSearch() {
+					const input = document.getElementById('post-search');
+					if(!input) return;
+
+					input.addEventListener('input', (e) => {
+						const term = e.target.value.toLowerCase();
+						const posts = document.querySelectorAll('#all-posts article');
+						posts.forEach(post => {
+							const title = post.querySelector('h3').textContent.toLowerCase();
+							const excerpt = post.querySelector('.excerpt').textContent.toLowerCase();
+							if(title.includes(term) || excerpt.includes(term)) {
+								post.style.display = 'block';
+							} else {
+								post.style.display = 'none';
+							}
+						});
+					});
+				}
+
+				initTypewriter() {
+					const el = document.getElementById('typewriter');
+					if(!el) return;
+					const roles = ["Information Tech", "Cybersecurity", "Linux Advocates", "Platform Builders"];
+					let roleIdx = 0, charIdx = 0, isDeleting = false;
+
+					const type = () => {
+						const current = roles[roleIdx];
+						el.textContent = current.substring(0, charIdx + (isDeleting ? -1 : 1));
+						charIdx += isDeleting ? -1 : 1;
+
+						if (!isDeleting && charIdx === current.length) {
+							setTimeout(() => isDeleting = true, 2000);
+						} else if (isDeleting && charIdx === 0) {
+							isDeleting = false;
+							roleIdx = (roleIdx + 1) % roles.length;
+						}
+						setTimeout(type, isDeleting ? 100 : 150);
+					};
+					type();
+				}
+
+				initObservers() {
+					const observer = new IntersectionObserver((entries) => {
+						entries.forEach(entry => {
+							if(entry.isIntersecting) {
+								entry.target.classList.add('visible');
+								observer.unobserve(entry.target);
+							}
+						});
+					}, { threshold: 0.1 });
+
+					document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+				}
+			}
+
+			document.addEventListener('DOMContentLoaded', () => new BlogApp());
+		</script>
+	</body>
+	</html>
+}
+
+// Reusable Component for a single post item
+templ PostItem(post Post) {
+	<article class="group border-l-2 border-[#282c34] pl-4 hover:border-[#61afef] transition-colors">
+		<p class="text-sm text-[#5c6370] mb-1">{ post.Date }</p>
+		<h3 class="text-2xl font-bold text-[#98c379] group-hover:text-[#c678dd] transition-colors">
+			{ post.Title }
+		</h3>
+		<p class="mt-2 text-[#abb2bf] excerpt">{ post.Excerpt }</p>
+		<a href={ templ.SafeURL(fmt.Sprintf("#post/%s", post.ID)) }
+		   class="mt-4 inline-block text-[#c678dd] font-semibold hover:text-[#61afef] transition-transform group-hover:translate-x-1">
+		   Read More &rarr;
+		</a>
+	</article>
+}
