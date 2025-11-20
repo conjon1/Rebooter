@@ -2,4 +2,12 @@
 - rebooter.blog/#authors/ -> rebooter.blog/#authors/CJ/ that authors resume and introduction page
   - [ ] Kesh
   - [ ] CJ
-** TODO add Resume download button once inside a certain authors page
+** TODO Add Resume download button once inside a certain authors page
+** TODO Add section to contact author
+* TODO make a Logo/Favicon For Rebooter.blog
+* TODO Look into Newsletter email platforms - Automate blog posts in the email newsletter
+** Set up Linkedin Page with news letter
+* TODO Add a contact section to contact the
+* TODO Make list for other websites to post to
+** TODO look into automatic posting
+** TODO find/ make a linkedin style converter for articles
