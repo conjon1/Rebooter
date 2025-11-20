@@ -1,1 +1,5 @@
-* 
+* TODO add meet the authors pages with resumes
+- rebooter.blog/#authors/ -> rebooter.blog/#authors/CJ/ that authors resume and introduction page
+  - [ ] Kesh
+  - [ ] CJ
+** TODO add Resume download button once inside a certain authors page
