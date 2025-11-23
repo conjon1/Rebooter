@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Industries in Demand for CERT C Compliant Security-Focused Coders</title>
+    <meta name="date" content="November 22, 2025">
+    <meta name="excerpt" content="The Therac-25 disaster taught us that bugs in C code can be lethal. Learn why aerospace, automotive, and medical industries now mandate CERT C compliance to prevent vulnerabilities in life-critical systems.">
+    <meta name="author" content="Tanveer Salim">
+
+    <style>
+        body { 
+            line-height: 1.6; 
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        h1, h2, h3, h4, h5 { line-height: 1.2; margin-top: 1.5em; }
+        code { 
+            background-color: #333; 
+            color: #f1f1f1;
+            padding: 2px 5px; 
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+        }
+        pre { 
+            background-color: #282c34; 
+            color: #abb2bf;
+            padding: 1em; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        strong {
+            font-weight: bold;
+        }
+        blockquote {
+            border-left: 4px solid #ccc;
+            padding-left: 1em;
+            margin-left: 0;
+            font-style: italic;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<h1 id="industries-in-demand-for-cert-c-compliant-security-focused-coders">Industries in Demand for CERT C Compliant Security-Focused Coders</h1>
+<p>Between 1985 and 1987, <a href="https://www.cs.columbia.edu/~junfeng/08fa-e6998/sched/readings/therac25.pdf">a radiation therapy machine called the Therac-25</a> killed three people and seriously injured three others. The machine was supposed to deliver controlled doses of radiation to cancer patients. Instead, it delivered radiation doses hundreds of times higher than intended.</p>
+<p>The cause? A race condition in the C code controlling the machine. When an operator entered treatment parameters too quickly, the software would configure the machine for high-energy electron mode while the safety mechanisms thought it was in low-energy X-ray mode. The patients received massive radiation overdoses.</p>
+<p>One victim, a 33-year-old woman, felt an intense burning sensation during treatment. She died from radiation poisoning. Another patient, a man receiving treatment for a tumor, received such a massive dose that he developed radiation burns throughout his body. He died five months later.</p>
+<p>The Therac-25 disaster wasn&#39;t caused by sophisticated hackers or nation-state attackers. It was caused by a simple bug—the kind of concurrency error that CERT C rules are specifically designed to prevent.</p>
+<p>This is what happens when C code controlling life-critical systems has bugs. People die. And the industries that learned this lesson the hard way are now desperate for developers who understand how to write secure C code.</p>
+<p>Let me show you which industries need CERT C expertise—and more importantly, why their software can&#39;t afford to have the vulnerabilities that secure coding practices eliminate.</p>
+<h2 id="aerospace-where-every-line-of-code-gets-audited">Aerospace: Where Every Line of Code Gets Audited</h2>
+<p>Flight control software runs on embedded systems with no room for error. You&#39;re at 35,000 feet when the autopilot makes a calculation. That calculation depends on sensor data stored in memory. If a buffer overflow corrupts the memory location next to that sensor data, the autopilot is now making decisions based on garbage values.</p>
+<p>For those of you educated in secure coding in C, you&#39;ll immediately recognize this scenario. The <code>gets()</code> function in C will copy characters into a buffer regardless of the buffer&#39;s size. If you&#39;re reading sensor data and use <code>gets()</code> or don&#39;t properly validate array bounds, you can overwrite adjacent memory. That adjacent memory might be storing your altitude. Or your airspeed. Or your pitch angle.</p>
+<p><a href="https://www.blueringmachining.com/what-are-important-aerospace-machining-certifications/">Aerospace companies mandate CERT C compliance</a> because they&#39;ve debugged these exact bugs in code that was controlling actual aircraft. This isn&#39;t theoretical—it&#39;s the accumulated knowledge from decades of incidents where software bugs caused crashes.</p>
+<p>When aerospace engineers read CERT C Rule ARR30-C—&quot;Do not form or use out-of-bounds pointers or array subscripts&quot;—they&#39;re not reading a style guideline. They&#39;re reading a rule written in blood.</p>
+<h2 id="automotive-your-car-is-a-computer-on-wheels">Automotive: Your Car is a Computer on Wheels</h2>
+<p>I want you to imagine something. You&#39;re driving on the highway. Your adaptive cruise control maintains distance from the car ahead. The distance sensor returns a measurement. The code multiplies this measurement by a constant to calculate braking force.</p>
+<p>What happens when that multiplication overflows?</p>
+<p>In C, when you multiply two integers and the result exceeds the maximum value the integer type can hold, you don&#39;t get an error. You get wraparound. A large positive number becomes small. Or negative, if you&#39;re unlucky. Then that negative value gets cast to unsigned—and suddenly you have a massive number that makes no physical sense.</p>
+<p>Your car&#39;s computer thinks the vehicle ahead is either impossibly close or impossibly far away. It calculates braking force based on corrupted data. Either it slams the brakes when it shouldn&#39;t, causing the car behind you to rear-end you at highway speed—or it doesn&#39;t brake at all, and you slam into the car ahead.</p>
+<p>Modern vehicles have millions of lines of C code controlling anti-lock brakes, airbag deployment, electronic stability control, and autonomous driving features. <a href="https://www.parasoft.com/learning-center/iso-26262/what-is/">The automotive industry requires secure coding practices</a> because integer overflows have caused real crashes with real injuries. Automotive engineers have spent weeks debugging crashes where someone forgot to check for overflow before doing arithmetic on sensor data.</p>
+<h2 id="medical-devices-code-running-inside-your-body">Medical Devices: Code Running Inside Your Body</h2>
+<p>If automotive software is dangerous when it fails, medical device software is even worse. Because when medical device code has bugs, there&#39;s no recall notice. There&#39;s no software update. The code is running inside someone&#39;s body.</p>
+<p>A pacemaker is a small computer implanted in your chest. It monitors your heart rhythm and delivers electrical impulses when needed. The code running on that device is written in C because the hardware is resource-constrained and needs direct memory access for real-time performance.</p>
+<p>Now imagine the code has a null pointer dereference. In a desktop application, you&#39;d get a segmentation fault, the program would crash, and you&#39;d restart it. In a pacemaker implanted in someone&#39;s chest, the device crashes and stops monitoring heart rhythm. If the patient has a life-threatening arrhythmia in those seconds while the device is crashed, there&#39;s no one watching. No one delivering the electrical impulse that keeps them alive.</p>
+<p>Or consider an insulin pump. It calculates insulin delivery based on blood glucose readings. The glucose meter sends data to the pump. If the input parsing code has a buffer overflow, an attacker could inject malicious data—but even without an attacker, a simple bounds checking error could cause the pump to misread glucose values. Too much insulin delivered means hypoglycemic shock, seizure, coma, death.</p>
+<p><a href="https://www.globenewswire.com/news-release/2023/07/27/2711792/0/en/Aerospace-and-Life-Sciences-Testing-Inspection-and-Certification-Market-to-Surpass-48-4-billion-by-2030-Drives-Due-to-Growing-Regulatory-Standards.html">Medical device manufacturers face strict regulations</a> precisely because these bugs kill people. The Therac-25 disaster taught the industry that radiation therapy machines need rigorous software safety practices. Modern medical device manufacturers learned from that tragedy.</p>
+<p>CERT C exists to eliminate undefined behavior before code gets implanted in someone&#39;s body. Before it&#39;s trusted to keep them alive.</p>
+<h2 id="industrial-control-systems-when-scada-fails-cities-suffer">Industrial Control Systems: When SCADA Fails, Cities Suffer</h2>
+<p>Beyond individual safety, there&#39;s another domain where C coding bugs threaten lives at scale: the infrastructure systems that keep civilization running.</p>
+<p>Industrial Control Systems weren&#39;t designed for security. They were designed in the 1970s and 80s when &quot;security&quot; meant a chain-link fence and a guard at the gate. The control software was written in C with zero consideration for security because these systems weren&#39;t networked.</p>
+<p>That&#39;s changed. <a href="https://www.infosecinstitute.com/roles/ot-security-practitioner-careers/">SCADA systems now connect to corporate networks</a>, which connect to the internet. A water treatment plant&#39;s SCADA system is potentially accessible to anyone who can compromise the network perimeter.</p>
+<p>Here&#39;s what a format string vulnerability can do to a water treatment plant:</p>
+<p>The SCADA software logs sensor readings from the chlorine monitors. The logging code uses <code>printf()</code> with user-controlled input directly in the format string—a classic mistake. An attacker sends a crafted sensor reading that includes format specifiers like <code>%x</code> to leak memory or <code>%n</code> to write to arbitrary memory addresses.</p>
+<p>The <code>%x</code> specifiers dump memory contents, potentially revealing cryptographic keys or the state of safety systems. The <code>%n</code> specifier writes values to memory. An attacker can now modify the SCADA system&#39;s state. They disable the chlorine monitors that detect when water isn&#39;t properly disinfected. Contaminated water flows to thousands of homes. People get sick. Some die.</p>
+<p>In 2021, an attacker accessed a water treatment facility&#39;s SCADA system and attempted to poison the water supply by remotely changing chemical levels. The attack was detected and stopped—but it demonstrated that these systems are accessible and vulnerable.</p>
+<p>Format string vulnerabilities aren&#39;t coding style issues when you&#39;re writing SCADA software. They&#39;re potential weapons that attackers can use to kill people.</p>
+<h2 id="iot-devices-billions-of-targets">IoT Devices: Billions of Targets</h2>
+<p>Smart locks on apartment doors. Baby monitors in bedrooms. Industrial sensors in manufacturing plants. Medical devices in hospitals. <a href="https://www.coursera.org/articles/iot-security-certification">These devices are projected to reach 39.6 billion by 2033</a>.</p>
+<p>Most run embedded C code on processors with no memory protection, no operating system security features, no runtime bounds checking. When there&#39;s a bug in the code, there&#39;s no safety net. A buffer overflow in a smart lock&#39;s firmware means attackers can remotely unlock doors. A use-after-free bug in an industrial sensor means attackers can manipulate the readings that automated systems depend on.</p>
+<p><a href="https://www.coursera.org/articles/iot-security-certification">IoT devices experience 5,400 attacks per month on average</a>. These attacks succeed because developers used <code>strcpy()</code> instead of <code>strncpy()</code>. Because they didn&#39;t validate array indices. Because they assumed input would be well-formed.</p>
+<p>Take a look at a simple example. You&#39;re writing firmware for a smart thermostat. The device receives temperature setpoint commands over the network. Your code looks like this:</p>
+<pre><code class="lang-c"><span class="hljs-keyword">char</span> <span class="hljs-built_in">buffer</span>[<span class="hljs-number">64</span>];
+gets(<span class="hljs-built_in">buffer</span>);  <span class="hljs-comment">// Read the setpoint command</span>
+</code></pre>
+<p>For those of you educated in secure coding in C, you immediately see the problem. The <code>gets()</code> function—the same function that enabled the Morris worm back in 1988—copies input into the buffer regardless of size. An attacker sends 200 bytes. Your 64-byte buffer overflows. Adjacent memory gets corrupted. That adjacent memory might be the authentication token. Or the network credentials. Or function pointers that the attacker can redirect to malicious code.</p>
+<p>The device is now compromised. Multiply this by millions of IoT devices all making the same mistake, and you have a massive botnet capable of taking down internet infrastructure.</p>
+<p>CERT C rules force you to write code that&#39;s secure even when attackers are actively trying to exploit it. They eliminate the assumptions that lead to vulnerabilities.</p>
+<h2 id="why-these-industries-need-you">Why These Industries Need You</h2>
+<p><a href="https://www.perforce.com/blog/kw/what-is-cert">82% of software vulnerabilities come from coding errors</a>. Not zero-days. Not sophisticated exploits. Just bugs in the code.</p>
+<p>The <a href="https://wiki.sei.cmu.edu/confluence/display/c">CERT C Coding Standard</a> was developed by over 1,900 security experts who analyzed real-world vulnerabilities and documented the coding practices that prevent them. Each rule addresses a specific class of bug that has caused actual security incidents or safety failures.</p>
+<p>When aerospace companies require CERT C compliance, they&#39;re not checking a regulatory box. They&#39;re requiring proof that you won&#39;t repeat the mistakes that brought down aircraft. When automotive manufacturers require it, they&#39;re requiring proof that your code won&#39;t be the reason for a recall—or a fatality. When medical device companies require it, they&#39;re requiring proof that your code won&#39;t fail inside someone&#39;s body.</p>
+<p>The Therac-25 killed people because of a race condition that proper coding practices would have prevented. Modern industries learned from that disaster. They know that undefined behavior in C isn&#39;t an academic curiosity—it&#39;s the difference between a working safety system and a death trap.</p>
+<p>If you&#39;re learning CERT C, you&#39;re not just learning rules. You&#39;re learning the accumulated wisdom from decades of debugging failures that killed people. You&#39;re learning how to write code that saves lives.</p>
+<hr>
+<p>Thanks for reading this blog!</p>

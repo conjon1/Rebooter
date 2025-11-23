@@ -1,5 +1,13 @@
 [
   {
+    "id": "CertCIndustries",
+    "title": "Industries in Demand for CERT C Compliant Security-Focused Coders",
+    "date": "November 22, 2025",
+    "excerpt": "The Therac-25 disaster taught us that bugs in C code can be lethal. Learn why aerospace, automotive, and medical industries now mandate CERT C compliance to prevent vulnerabilities in life-critical systems.",
+    "url": "posts/CertCIndustries.html",
+    "author": "Tanveer Salim"
+  },
+  {
     "id": "DockerIsNotASanbox",
     "title": "Docker is not a Sandbox",
     "date": "November 12, 2025",
