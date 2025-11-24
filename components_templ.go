@@ -10,31 +10,6 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "fmt"
 
-type AuthorData struct {
-	Name     string
-	Linkedin string
-	Github   string
-}
-
-var authors = []AuthorData{
-	{
-		Name:     "Connal McInnis",
-		Linkedin: "https://www.linkedin.com/in/connalmcinnis/",
-		Github:   "https://github.com/conjon1",
-	},
-	{
-		Name:     "Keshav Italia",
-		Linkedin: "https://www.linkedin.com/in/keshav-italia-151b74171/",
-		Github:   "https://github.com/Keshav25",
-	},
-	{
-		Name:     "Tanveer Salim",
-		Linkedin: "https://www.linkedin.com/in/fosres",
-		Github:   "https://github.com/fosres",
-	},
-}
-
-// Helper to slice posts for the "Recent" section safely
 func getRecent(posts []Post, count int) []Post {
 	if len(posts) < count {
 		return posts
@@ -52,7 +27,7 @@ func getPostsByAuthor(posts []Post, authorName string) []Post {
 	return ap
 }
 
-func Index(posts []Post) templ.Component {
+func Index(posts []Post, authors []AuthorData) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -80,7 +55,7 @@ func Index(posts []Post) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("// Rebooter")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 89, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 64, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -113,64 +88,99 @@ func Index(posts []Post) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div></section><section id=\"post-view\" class=\"page min-h-screen hidden\"><div class=\"fade-in\"><button id=\"back-btn\" class=\"mb-8 text-[#c678dd] hover:text-[#61afef] transition-transform hover:-translate-x-1\">&larr; Back to Blog</button><div id=\"post-content\" class=\"prose max-w-none\"></div></div></section><section id=\"authors\" class=\"page min-h-screen hidden\"><div class=\"fade-in\"><h1 class=\"text-4xl font-bold mb-12 border-b-2 border-[#61afef] pb-4\">Authors</h1><div class=\"space-y-16\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div></section><section id=\"content-view\" class=\"page min-h-screen hidden\"><div class=\"fade-in\"><button id=\"back-btn\" class=\"mb-8 text-[#c678dd] hover:text-[#61afef] transition-transform hover:-translate-x-1\">&larr; Back</button><div id=\"dynamic-content\" class=\"prose max-w-none\"></div></div></section><section id=\"authors\" class=\"page min-h-screen hidden\"><div class=\"fade-in\"><h1 class=\"text-4xl font-bold mb-12 border-b-2 border-[#61afef] pb-4\">Authors</h1><div class=\"space-y-16\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		if len(authors) == 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<p>No authors found.</p>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
 		for _, author := range authors {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"author-block\"><div class=\"mb-6\"><h2 class=\"text-3xl text-[#c678dd] font-bold mb-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"author-block\"><div class=\"mb-6\"><h2 class=\"text-3xl text-[#c678dd] font-bold mb-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(author.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 173, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 151, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</h2><div class=\"flex space-x-4 font-mono text-sm\"><a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</h2><div class=\"flex space-x-4 font-mono text-sm\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 templ.SafeURL
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(author.Github))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 175, Col: 48}
+			if author.Github != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 templ.SafeURL
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(author.Github))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 154, Col: 49}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" target=\"_blank\" class=\"text-[#98c379] hover:underline\">GitHub</a> <span class=\"text-[#5c6370]\">/</span> ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if author.Linkedin != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 templ.SafeURL
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(author.Linkedin))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 158, Col: 51}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" target=\"_blank\" class=\"text-[#98c379] hover:underline\">LinkedIn</a> ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<span class=\"text-[#5c6370]\">/</span> <a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" target=\"_blank\" class=\"text-[#98c379] hover:underline\">GitHub</a> <span class=\"text-[#5c6370]\">/</span> <a href=\"")
+			var templ_7745c5c3_Var6 templ.SafeURL
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("#author/%s", author.ID)))
 			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 templ.SafeURL
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(author.Linkedin))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 177, Col: 50}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" target=\"_blank\" class=\"text-[#98c379] hover:underline\">LinkedIn</a></div></div><h3 class=\"text-xl font-bold text-[#61afef] mb-6\">Posts by ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(author.Name)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 181, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 161, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</h3><div class=\"space-y-6 pl-4 border-l-2 border-[#282c34]\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" class=\"text-[#98c379] hover:underline\">Profile</a></div></div><h3 class=\"text-xl font-bold text-[#61afef] mb-6\">Posts by ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(author.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 165, Col: 80}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</h3><div class=\"space-y-6 pl-4 border-l-2 border-[#282c34]\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -182,17 +192,17 @@ func Index(posts []Post) templ.Component {
 					}
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<p class=\"text-[#5c6370] italic\">No posts published yet.</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<p class=\"text-[#5c6370] italic\">No posts published yet.</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div></section></main><footer class=\"border-t border-[#5c6370] mt-20 py-8 text-center text-[#5c6370]\"><p>&copy; 2025 Connal J. McInnis & Keshav Italia. Built with Go & Templ.</p></footer><script>\n\t\t\tclass BlogApp {\n\t\t\t\tconstructor() {\n\t\t\t\t\tthis.pages = document.querySelectorAll('.page');\n\t\t\t\t\tthis.contentDiv = document.getElementById('post-content');\n\t\t\t\t\tthis.initRouter();\n\t                this.initMobileMenu();\n\t\t\t\t\tthis.initSearch();\n\t\t\t\t\tthis.initTypewriter();\n\t\t\t\t\tthis.initObservers();\n\t\t\t\t}\n\n\t\t\t\t// Simple Hash Router\n\t\t\t\tinitRouter() {\n\t\t\t\t\twindow.addEventListener('hashchange', () => this.handleRoute());\n\t\t\t\t\tthis.handleRoute();\n\n\t\t\t\t\tdocument.getElementById('back-btn').addEventListener('click', () => {\n\t\t\t\t\t\twindow.location.hash = '#blog';\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tasync handleRoute() {\n\t\t\t\t\tconst hash = window.location.hash || '#home';\n\n\t\t\t\t\tif (hash.startsWith('#post/')) {\n\t\t\t\t\t\tconst postId = hash.replace('#post/', '');\n\t\t\t\t\t\tawait this.loadPost(postId);\n\t\t\t\t\t\tthis.showPage('post-view');\n\t\t\t\t\t} else {\n\t\t\t\t\t\tthis.showPage(hash.replace('#', ''));\n\t\t\t\t\t}\n\t\t\t\t\twindow.scrollTo(0,0);\n\t\t\t\t}\n\n\t\t\t\tshowPage(id) {\n\t\t\t\t\tthis.pages.forEach(p => {\n\t\t\t\t\t\tif(p.id === id) {\n\t\t\t\t\t\t\tp.classList.remove('hidden');\n\t\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\t\tp.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible'));\n\t\t\t\t\t\t\t}, 50);\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\tp.classList.add('hidden');\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tasync loadPost(id) {\n\t\t\t\t\t    this.contentDiv.innerHTML = '<p class=\"text-center animate-pulse\">Loading content...</p>';\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tconst res = await fetch(`posts/${id}.html`);\n\t\t\t\t\t\t\tif(!res.ok) throw new Error('Post not found');\n\t\t\t\t\t\t\tconst html = await res.text();\n\n\t\t\t\t\t\t\tconst doc = new DOMParser().parseFromString(html, 'text/html');\n\n\t\t\t\t\t\t\tconst authorMeta = doc.querySelector('meta[name=\"author\"]');\n\n\t\t\t\t\t\t\tif (authorMeta && authorMeta.content) {\n\t\t\t\t\t\t\t\tconst authorName = authorMeta.content;\n\n\t\t\t\t\t\t\t\tconst authorHtml = `<p class=\"text-sm text-[#5c6370] mb-8 -mt-2\">Written by <span class=\"text-[#c678dd] font-semibold\">${authorName}</span></p>`;\n\n\t\t\t\t\t\t\t\tconst h1 = doc.querySelector('h1');\n\t\t\t\t\t\t\t\tif (h1) {\n\t\t\t\t\t\t\t\t\th1.insertAdjacentHTML('afterend', authorHtml);\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\tdoc.body.insertAdjacentHTML('afterbegin', authorHtml);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\n\t\t\t\t\t\t\tthis.contentDiv.innerHTML = doc.body.innerHTML;\n\t\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\t\tthis.contentDiv.innerHTML = `<p class=\"text-[#e06c75]\">Error loading post: ${e.message}</p>`;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tinitSearch() {\n\t\t\t\t\tconst input = document.getElementById('post-search');\n\t\t\t\t\tif(!input) return;\n\n\t\t\t\t\tinput.addEventListener('input', (e) => {\n\t\t\t\t\t\tconst term = e.target.value.toLowerCase();\n\t\t\t\t\t\tconst posts = document.querySelectorAll('#all-posts article');\n\t\t\t\t\t\tposts.forEach(post => {\n\t\t\t\t\t\t\tconst title = post.querySelector('h3').textContent.toLowerCase();\n\t\t\t\t\t\t\tconst excerpt = post.querySelector('.excerpt').textContent.toLowerCase();\n\t\t\t\t\t\t\tif(title.includes(term) || excerpt.includes(term)) {\n\t\t\t\t\t\t\t\tpost.style.display = 'block';\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tpost.style.display = 'none';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tinitTypewriter() {\n\t\t\t\t\tconst el = document.getElementById('typewriter');\n\t\t\t\t\tif(!el) return;\n\t\t\t\t\tconst roles = [\n\t\t\t\t\t\t\"Software Engineers\",\n\t\t\t\t\t\t\"Cybersecurity Researchers\",\n\t\t\t\t\t\t\"Free Software Advocates\",\n\t\t\t\t\t\t\"Technology Consultants\",\n\t\t\t\t\t\t\"Data Scientists\",\n\t\t\t\t\t\t\"Linux Enthusiasts\",\n\t\t\t\t\t\t\"Software Architects\",\n\t\t\t\t\t\t\"Legacy Modernizers\",\n\t\t\t\t\t\t\"Platform Builders\",\n\t\t\t\t\t\t\"Daemon Slayers\",\n\t\t\t\t\t\t\"Unix Wizards\",\n\t\t\t\t\t\t\"Coffee-Driven Developers\",\n\t\t\t\t\t\t\"Documentation Meditators\",\n\t\t\t\t\t\t\"GNU/Programmers\",\n\t\t\t\t\t\t\"idots\"\n\t\t\t\t\t];\n\t\t\t\t\tlet roleIdx = 0, charIdx = 0, isDeleting = false;\n\n\t\t\t\t\tconst type = () => {\n\t\t\t\t\t\tconst current = roles[roleIdx];\n\t\t\t\t\t\tel.textContent = current.substring(0, charIdx + (isDeleting ? -1 : 1));\n\t\t\t\t\t\tcharIdx += isDeleting ? -1 : 1;\n\n\t\t\t\t\t\tif (!isDeleting && charIdx === current.length) {\n\t\t\t\t\t\t\tsetTimeout(() => isDeleting = true, 2000);\n\t\t\t\t\t\t} else if (isDeleting && charIdx === 0) {\n\t\t\t\t\t\t\tisDeleting = false;\n\t\t\t\t\t\t\troleIdx = (roleIdx + 1) % roles.length;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tsetTimeout(type, isDeleting ? 100 : 150);\n\t\t\t\t\t};\n\t\t\t\t\ttype();\n\t\t\t\t}\n\n\t\t\t\tinitObservers() {\n\t\t\t\t\tconst observer = new IntersectionObserver((entries) => {\n\t\t\t\t\t\tentries.forEach(entry => {\n\t\t\t\t\t\t\tif(entry.isIntersecting) {\n\t\t\t\t\t\t\t\tentry.target.classList.add('visible');\n\t\t\t\t\t\t\t\tobserver.unobserve(entry.target);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t}, { threshold: 0.1 });\n\n\t\t\t\t\tdocument.querySelectorAll('.fade-in').forEach(el => observer.observe(el));\n\t\t\t\t}\n\n\t\t\t\tinitMobileMenu() {\n\t\t\t\t\tconst btn = document.getElementById('mobile-menu-btn');\n\t\t\t\t\tconst menu = document.getElementById('mobile-menu');\n\t\t\t\t\tif(btn && menu) {\n\t\t\t\t\t\t// Toggle menu visibility\n\t\t\t\t\t\tbtn.addEventListener('click', () => {\n\t\t\t\t\t\t\tmenu.classList.toggle('hidden');\n\t\t\t\t\t\t});\n\t\t\t\t\t\t// Close menu when a link is clicked\n\t\t\t\t\t\tmenu.querySelectorAll('.mobile-link').forEach(link => {\n\t\t\t\t\t\t\tlink.addEventListener('click', () => {\n\t\t\t\t\t\t\t\tmenu.classList.add('hidden');\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tdocument.addEventListener('DOMContentLoaded', () => new BlogApp());\n\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div></div></section></main><footer class=\"border-t border-[#5c6370] mt-20 py-8 text-center text-[#5c6370]\"><p>&copy; 2025 Connal J. McInnis & Keshav Italia. Built with Go & Templ.</p></footer><script>\n\t\t\tclass BlogApp {\n\t\t\t\tconstructor() {\n\t\t\t\t\tthis.pages = document.querySelectorAll('.page');\n\t\t\t\t\tthis.contentDiv = document.getElementById('dynamic-content');\n\t\t\t\t\tthis.authorsData = []; // Store author metadata\n\n\t\t\t\t\tthis.init();\n\t\t\t\t}\n\n\t\t\t\tasync init() {\n\t\t\t\t\tawait this.fetchAuthors();\n\t\t\t\t\tthis.initRouter();\n\t\t\t\t\tthis.initMobileMenu();\n\t\t\t\t\tthis.initSearch();\n\t\t\t\t\tthis.initTypewriter();\n\t\t\t\t\tthis.initObservers();\n\t\t\t\t}\n\n\t\t\t\tasync fetchAuthors() {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst res = await fetch('authors.json');\n\t\t\t\t\t\tif (res.ok) {\n\t\t\t\t\t\t\tthis.authorsData = await res.json();\n\t\t\t\t\t\t}\n\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\tconsole.error(\"Failed to load authors.json\", e);\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// Simple Hash Router\n\t\t\t\tinitRouter() {\n\t\t\t\t\twindow.addEventListener('hashchange', () => this.handleRoute());\n\t\t\t\t\tthis.handleRoute();\n\n\t\t\t\t\tdocument.getElementById('back-btn').addEventListener('click', () => {\n\t\t\t\t\t\t// Logic to go back to previous context if possible, otherwise default to blog\n\t\t\t\t\t\twindow.history.back();\n\t\t\t\t\t\t// Fallback if history is empty/external\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\tif(!window.location.hash) window.location.hash = '#blog';\n\t\t\t\t\t\t}, 100);\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tasync handleRoute() {\n\t\t\t\t\tconst hash = window.location.hash || '#home';\n\n\t\t\t\t\tif (hash.startsWith('#post/')) {\n\t\t\t\t\t\tconst postId = hash.replace('#post/', '');\n\t\t\t\t\t\tawait this.loadPost(postId);\n\t\t\t\t\t\tthis.showPage('content-view');\n\t\t\t\t\t} else if (hash.startsWith('#author/')) {\n\t\t\t\t\t\tconst authorId = hash.replace('#author/', '');\n\t\t\t\t\t\tawait this.loadAuthorPage(authorId);\n\t\t\t\t\t\tthis.showPage('content-view');\n\t\t\t\t\t} else {\n\t\t\t\t\t\tthis.showPage(hash.replace('#', ''));\n\t\t\t\t\t}\n\t\t\t\t\twindow.scrollTo(0,0);\n\t\t\t\t}\n\n\t\t\t\tshowPage(id) {\n\t\t\t\t\tthis.pages.forEach(p => {\n\t\t\t\t\t\tif(p.id === id) {\n\t\t\t\t\t\t\tp.classList.remove('hidden');\n\t\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\t\tp.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible'));\n\t\t\t\t\t\t\t}, 50);\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\tp.classList.add('hidden');\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tasync loadPost(id) {\n\t\t\t\t\tthis.contentDiv.innerHTML = '<p class=\"text-center animate-pulse\">Loading content...</p>';\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst res = await fetch(`posts/${id}.html`);\n\t\t\t\t\t\tif(!res.ok) throw new Error('Post not found');\n\t\t\t\t\t\tconst html = await res.text();\n\n\t\t\t\t\t\tconst doc = new DOMParser().parseFromString(html, 'text/html');\n\t\t\t\t\t\tconst authorMeta = doc.querySelector('meta[name=\"author\"]');\n\n\t\t\t\t\t\tif (authorMeta && authorMeta.content) {\n\t\t\t\t\t\t\tconst authorName = authorMeta.content;\n\n\t\t\t\t\t\t\t// Check if we have a page for this author\n\t\t\t\t\t\t\tconst authorObj = this.authorsData.find(a => a.name === authorName);\n\t\t\t\t\t\t\tlet nameHtml = `<span class=\"text-[#c678dd] font-semibold\">${authorName}</span>`;\n\n\t\t\t\t\t\t\tif (authorObj) {\n\t\t\t\t\t\t\t\tnameHtml = `<a href=\"#author/${authorObj.id}\" class=\"text-[#c678dd] font-semibold hover:underline hover:text-[#61afef] transition-colors\">${authorName}</a>`;\n\t\t\t\t\t\t\t}\n\n\t\t\t\t\t\t\tconst authorHtml = `<p class=\"text-sm text-[#5c6370] mb-8 -mt-2\">Written by ${nameHtml}</p>`;\n\n\t\t\t\t\t\t\tconst h1 = doc.querySelector('h1');\n\t\t\t\t\t\t\tif (h1) {\n\t\t\t\t\t\t\t\th1.insertAdjacentHTML('afterend', authorHtml);\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tdoc.body.insertAdjacentHTML('afterbegin', authorHtml);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\tthis.contentDiv.innerHTML = doc.body.innerHTML;\n\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\tthis.contentDiv.innerHTML = `<p class=\"text-[#e06c75]\">Error loading post: ${e.message}</p>`;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tasync loadAuthorPage(id) {\n\t\t\t\t\tthis.contentDiv.innerHTML = '<p class=\"text-center animate-pulse\">Loading author profile...</p>';\n\t\t\t\t\ttry {\n\t\t\t\t\t\tconst res = await fetch(`authors/${id}.html`);\n\t\t\t\t\t\tif(!res.ok) throw new Error('Author profile not found');\n\t\t\t\t\t\tconst html = await res.text();\n\t\t\t\t\t\tconst doc = new DOMParser().parseFromString(html, 'text/html');\n\t\t\t\t\t\tthis.contentDiv.innerHTML = doc.body.innerHTML;\n\t\t\t\t\t} catch (e) {\n\t\t\t\t\t\tthis.contentDiv.innerHTML = `<p class=\"text-[#e06c75]\">Error loading author profile: ${e.message}</p>`;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tinitSearch() {\n\t\t\t\t\tconst input = document.getElementById('post-search');\n\t\t\t\t\tif(!input) return;\n\n\t\t\t\t\tinput.addEventListener('input', (e) => {\n\t\t\t\t\t\tconst term = e.target.value.toLowerCase();\n\t\t\t\t\t\tconst posts = document.querySelectorAll('#all-posts article');\n\t\t\t\t\t\tposts.forEach(post => {\n\t\t\t\t\t\t\tconst title = post.querySelector('h3').textContent.toLowerCase();\n\t\t\t\t\t\t\tconst excerpt = post.querySelector('.excerpt').textContent.toLowerCase();\n\t\t\t\t\t\t\tif(title.includes(term) || excerpt.includes(term)) {\n\t\t\t\t\t\t\t\tpost.style.display = 'block';\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tpost.style.display = 'none';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tinitTypewriter() {\n\t\t\t\t\tconst el = document.getElementById('typewriter');\n\t\t\t\t\tif(!el) return;\n\t\t\t\t\tconst roles = [\n\t\t\t\t\t\t\"Software Engineers\",\n\t\t\t\t\t\t\"Cybersecurity Researchers\",\n\t\t\t\t\t\t\"Free Software Advocates\",\n\t\t\t\t\t\t\"Technology Consultants\",\n\t\t\t\t\t\t\"Data Scientists\",\n\t\t\t\t\t\t\"Linux Enthusiasts\",\n\t\t\t\t\t\t\"Software Architects\",\n\t\t\t\t\t\t\"Legacy Modernizers\",\n\t\t\t\t\t\t\"Platform Builders\",\n\t\t\t\t\t\t\"Daemon Slayers\",\n\t\t\t\t\t\t\"Unix Wizards\",\n\t\t\t\t\t\t\"Coffee-Driven Developers\",\n\t\t\t\t\t\t\"Documentation Meditators\",\n\t\t\t\t\t\t\"GNU/Programmers\",\n\t\t\t\t\t\t\"idots\"\n\t\t\t\t\t];\n\t\t\t\t\tlet roleIdx = 0, charIdx = 0, isDeleting = false;\n\n\t\t\t\t\tconst type = () => {\n\t\t\t\t\t\tconst current = roles[roleIdx];\n\t\t\t\t\t\tel.textContent = current.substring(0, charIdx + (isDeleting ? -1 : 1));\n\t\t\t\t\t\tcharIdx += isDeleting ? -1 : 1;\n\n\t\t\t\t\t\tif (!isDeleting && charIdx === current.length) {\n\t\t\t\t\t\t\tsetTimeout(() => isDeleting = true, 2000);\n\t\t\t\t\t\t} else if (isDeleting && charIdx === 0) {\n\t\t\t\t\t\t\tisDeleting = false;\n\t\t\t\t\t\t\troleIdx = (roleIdx + 1) % roles.length;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tsetTimeout(type, isDeleting ? 100 : 150);\n\t\t\t\t\t};\n\t\t\t\t\ttype();\n\t\t\t\t}\n\n\t\t\t\tinitObservers() {\n\t\t\t\t\tconst observer = new IntersectionObserver((entries) => {\n\t\t\t\t\t\tentries.forEach(entry => {\n\t\t\t\t\t\t\tif(entry.isIntersecting) {\n\t\t\t\t\t\t\t\tentry.target.classList.add('visible');\n\t\t\t\t\t\t\t\tobserver.unobserve(entry.target);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t}, { threshold: 0.1 });\n\n\t\t\t\t\tdocument.querySelectorAll('.fade-in').forEach(el => observer.observe(el));\n\t\t\t\t}\n\n\t\t\t\tinitMobileMenu() {\n\t\t\t\t\tconst btn = document.getElementById('mobile-menu-btn');\n\t\t\t\t\tconst menu = document.getElementById('mobile-menu');\n\t\t\t\t\tif(btn && menu) {\n\t\t\t\t\t\tbtn.addEventListener('click', () => {\n\t\t\t\t\t\t\tmenu.classList.toggle('hidden');\n\t\t\t\t\t\t});\n\t\t\t\t\t\tmenu.querySelectorAll('.mobile-link').forEach(link => {\n\t\t\t\t\t\t\tlink.addEventListener('click', () => {\n\t\t\t\t\t\t\t\tmenu.classList.add('hidden');\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tdocument.addEventListener('DOMContentLoaded', () => new BlogApp());\n\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -217,64 +227,64 @@ func PostItem(post Post) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var7 == nil {
-			templ_7745c5c3_Var7 = templ.NopComponent
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<article class=\"group border-l-2 border-[#282c34] pl-4 hover:border-[#61afef] transition-colors\"><p class=\"text-sm text-[#5c6370] mb-1\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(post.Date)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 376, Col: 52}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</p><h3 class=\"text-2xl font-bold text-[#98c379] group-hover:text-[#c678dd] transition-colors\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<article class=\"group border-l-2 border-[#282c34] pl-4 hover:border-[#61afef] transition-colors\"><p class=\"text-sm text-[#5c6370] mb-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(post.Date)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 378, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 406, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</h3><p class=\"mt-2 text-[#abb2bf] excerpt\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</p><h3 class=\"text-2xl font-bold text-[#98c379] group-hover:text-[#c678dd] transition-colors\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(post.Excerpt)
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 380, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 408, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</p><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</h3><p class=\"mt-2 text-[#abb2bf] excerpt\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var11 templ.SafeURL
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("#post/%s", post.ID)))
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(post.Excerpt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 381, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 410, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" class=\"mt-4 inline-block text-[#c678dd] font-semibold hover:text-[#61afef] transition-transform group-hover:translate-x-1\">Read More &rarr;</a></article>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</p><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var12 templ.SafeURL
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("#post/%s", post.ID)))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 411, Col: 59}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"mt-4 inline-block text-[#c678dd] font-semibold hover:text-[#61afef] transition-transform group-hover:translate-x-1\">Read More &rarr;</a></article>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

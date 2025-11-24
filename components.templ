@@ -2,31 +2,6 @@ package main
 
 import "fmt"
 
-type AuthorData struct {
-	Name     string
-	Linkedin string
-	Github   string
-}
-
-var authors = []AuthorData{
-	{
-		Name:     "Connal McInnis",
-		Linkedin: "https://www.linkedin.com/in/connalmcinnis/",
-		Github:   "https://github.com/conjon1",
-	},
-	{
-		Name:     "Keshav Italia",
-		Linkedin: "https://www.linkedin.com/in/keshav-italia-151b74171/",
-		Github:   "https://github.com/Keshav25",
-	},
-	{
-		Name:     "Tanveer Salim",
-		Linkedin: "https://www.linkedin.com/in/fosres",
-		Github:   "https://github.com/fosres",
-	},
-}
-
-// Helper to slice posts for the "Recent" section safely
 func getRecent(posts []Post, count int) []Post {
 	if len(posts) < count {
 		return posts
@@ -44,7 +19,7 @@ func getPostsByAuthor(posts []Post, authorName string) []Post {
 	return ap
 }
 
-templ Index(posts []Post) {
+templ Index(posts []Post, authors []AuthorData) {
 	<!DOCTYPE html>
 	<html lang="en" class="scroll-smooth">
 	<head>
@@ -154,10 +129,10 @@ templ Index(posts []Post) {
 				</div>
 			</section>
 
-			<section id="post-view" class="page min-h-screen hidden">
+			<section id="content-view" class="page min-h-screen hidden">
 				<div class="fade-in">
-					<button id="back-btn" class="mb-8 text-[#c678dd] hover:text-[#61afef] transition-transform hover:-translate-x-1">&larr; Back to Blog</button>
-					<div id="post-content" class="prose max-w-none">
+					<button id="back-btn" class="mb-8 text-[#c678dd] hover:text-[#61afef] transition-transform hover:-translate-x-1">&larr; Back</button>
+					<div id="dynamic-content" class="prose max-w-none">
 						</div>
 				</div>
 			</section>
@@ -167,14 +142,23 @@ templ Index(posts []Post) {
 					<h1 class="text-4xl font-bold mb-12 border-b-2 border-[#61afef] pb-4">Authors</h1>
 
 					<div class="space-y-16">
+						if len(authors) == 0 {
+							<p>No authors found.</p>
+						}
 						for _, author := range authors {
 							<div class="author-block">
 								<div class="mb-6">
 									<h2 class="text-3xl text-[#c678dd] font-bold mb-2">{ author.Name }</h2>
 									<div class="flex space-x-4 font-mono text-sm">
-										<a href={ templ.SafeURL(author.Github) } target="_blank" class="text-[#98c379] hover:underline">GitHub</a>
+										if author.Github != "" {
+											<a href={ templ.SafeURL(author.Github) } target="_blank" class="text-[#98c379] hover:underline">GitHub</a>
+											<span class="text-[#5c6370]">/</span>
+										}
+										if author.Linkedin != "" {
+											<a href={ templ.SafeURL(author.Linkedin) } target="_blank" class="text-[#98c379] hover:underline">LinkedIn</a>
+										}
 										<span class="text-[#5c6370]">/</span>
-										<a href={ templ.SafeURL(author.Linkedin) } target="_blank" class="text-[#98c379] hover:underline">LinkedIn</a>
+										<a href={ templ.SafeURL(fmt.Sprintf("#author/%s", author.ID)) } class="text-[#98c379] hover:underline">Profile</a>
 									</div>
 								</div>
 
@@ -203,12 +187,30 @@ templ Index(posts []Post) {
 			class BlogApp {
 				constructor() {
 					this.pages = document.querySelectorAll('.page');
-					this.contentDiv = document.getElementById('post-content');
+					this.contentDiv = document.getElementById('dynamic-content');
+					this.authorsData = []; // Store author metadata
+
+					this.init();
+				}
+
+				async init() {
+					await this.fetchAuthors();
 					this.initRouter();
-	                this.initMobileMenu();
+					this.initMobileMenu();
 					this.initSearch();
 					this.initTypewriter();
 					this.initObservers();
+				}
+
+				async fetchAuthors() {
+					try {
+						const res = await fetch('authors.json');
+						if (res.ok) {
+							this.authorsData = await res.json();
+						}
+					} catch(e) {
+						console.error("Failed to load authors.json", e);
+					}
 				}
 
 				// Simple Hash Router
@@ -217,7 +219,12 @@ templ Index(posts []Post) {
 					this.handleRoute();
 
 					document.getElementById('back-btn').addEventListener('click', () => {
-						window.location.hash = '#blog';
+						// Logic to go back to previous context if possible, otherwise default to blog
+						window.history.back();
+						// Fallback if history is empty/external
+						setTimeout(() => {
+							if(!window.location.hash) window.location.hash = '#blog';
+						}, 100);
 					});
 				}
 
@@ -227,7 +234,11 @@ templ Index(posts []Post) {
 					if (hash.startsWith('#post/')) {
 						const postId = hash.replace('#post/', '');
 						await this.loadPost(postId);
-						this.showPage('post-view');
+						this.showPage('content-view');
+					} else if (hash.startsWith('#author/')) {
+						const authorId = hash.replace('#author/', '');
+						await this.loadAuthorPage(authorId);
+						this.showPage('content-view');
 					} else {
 						this.showPage(hash.replace('#', ''));
 					}
@@ -248,35 +259,56 @@ templ Index(posts []Post) {
 				}
 
 				async loadPost(id) {
-					    this.contentDiv.innerHTML = '<p class="text-center animate-pulse">Loading content...</p>';
-						try {
-							const res = await fetch(`posts/${id}.html`);
-							if(!res.ok) throw new Error('Post not found');
-							const html = await res.text();
+					this.contentDiv.innerHTML = '<p class="text-center animate-pulse">Loading content...</p>';
+					try {
+						const res = await fetch(`posts/${id}.html`);
+						if(!res.ok) throw new Error('Post not found');
+						const html = await res.text();
 
-							const doc = new DOMParser().parseFromString(html, 'text/html');
+						const doc = new DOMParser().parseFromString(html, 'text/html');
+						const authorMeta = doc.querySelector('meta[name="author"]');
 
-							const authorMeta = doc.querySelector('meta[name="author"]');
+						if (authorMeta && authorMeta.content) {
+							const authorName = authorMeta.content;
 
-							if (authorMeta && authorMeta.content) {
-								const authorName = authorMeta.content;
+							// Check if we have a page for this author
+							const authorObj = this.authorsData.find(a => a.name === authorName);
+							let nameHtml = `<span class="text-[#c678dd] font-semibold">${authorName}</span>`;
 
-								const authorHtml = `<p class="text-sm text-[#5c6370] mb-8 -mt-2">Written by <span class="text-[#c678dd] font-semibold">${authorName}</span></p>`;
-
-								const h1 = doc.querySelector('h1');
-								if (h1) {
-									h1.insertAdjacentHTML('afterend', authorHtml);
-								} else {
-									doc.body.insertAdjacentHTML('afterbegin', authorHtml);
-								}
+							if (authorObj) {
+								nameHtml = `<a href="#author/${authorObj.id}" class="text-[#c678dd] font-semibold hover:underline hover:text-[#61afef] transition-colors">${authorName}</a>`;
 							}
 
-							this.contentDiv.innerHTML = doc.body.innerHTML;
-						} catch(e) {
-							this.contentDiv.innerHTML = `<p class="text-[#e06c75]">Error loading post: ${e.message}</p>`;
+							const authorHtml = `<p class="text-sm text-[#5c6370] mb-8 -mt-2">Written by ${nameHtml}</p>`;
+
+							const h1 = doc.querySelector('h1');
+							if (h1) {
+								h1.insertAdjacentHTML('afterend', authorHtml);
+							} else {
+								doc.body.insertAdjacentHTML('afterbegin', authorHtml);
+							}
 						}
+
+						this.contentDiv.innerHTML = doc.body.innerHTML;
+					} catch(e) {
+						this.contentDiv.innerHTML = `<p class="text-[#e06c75]">Error loading post: ${e.message}</p>`;
 					}
-					initSearch() {
+				}
+
+				async loadAuthorPage(id) {
+					this.contentDiv.innerHTML = '<p class="text-center animate-pulse">Loading author profile...</p>';
+					try {
+						const res = await fetch(`authors/${id}.html`);
+						if(!res.ok) throw new Error('Author profile not found');
+						const html = await res.text();
+						const doc = new DOMParser().parseFromString(html, 'text/html');
+						this.contentDiv.innerHTML = doc.body.innerHTML;
+					} catch (e) {
+						this.contentDiv.innerHTML = `<p class="text-[#e06c75]">Error loading author profile: ${e.message}</p>`;
+					}
+				}
+
+				initSearch() {
 					const input = document.getElementById('post-search');
 					if(!input) return;
 
@@ -350,11 +382,9 @@ templ Index(posts []Post) {
 					const btn = document.getElementById('mobile-menu-btn');
 					const menu = document.getElementById('mobile-menu');
 					if(btn && menu) {
-						// Toggle menu visibility
 						btn.addEventListener('click', () => {
 							menu.classList.toggle('hidden');
 						});
-						// Close menu when a link is clicked
 						menu.querySelectorAll('.mobile-link').forEach(link => {
 							link.addEventListener('click', () => {
 								menu.classList.add('hidden');
