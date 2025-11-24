@@ -140,7 +140,7 @@ func parsePostHTML(path string) (Post, error) {
 
 	// Default author if not specified
 	if post.Author == "" {
-		post.Author = "Connal McInnis"
+		post.Author = "UNKNOWN"
 	}
 
 	return post, nil
