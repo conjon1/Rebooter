@@ -24,7 +24,6 @@ var authors = []AuthorData{
 		Linkedin: "https://www.linkedin.com/in/fosres",
 		Github:   "https://github.com/fosres",
 	},
-
 }
 
 // Helper to slice posts for the "Recent" section safely
@@ -249,26 +248,35 @@ templ Index(posts []Post) {
 				}
 
 				async loadPost(id) {
-					this.contentDiv.innerHTML = '<p class="text-center animate-pulse">Loading content...</p>';
-					try {
-						// Fetch the original HTML file
-						const res = await fetch(`posts/${id}.html`);
-						if(!res.ok) throw new Error('Post not found');
-						const html = await res.text();
+					    this.contentDiv.innerHTML = '<p class="text-center animate-pulse">Loading content...</p>';
+						try {
+							const res = await fetch(`posts/${id}.html`);
+							if(!res.ok) throw new Error('Post not found');
+							const html = await res.text();
 
-						// Parse the HTML to extract just the <body> content
-						const doc = new DOMParser().parseFromString(html, 'text/html');
+							const doc = new DOMParser().parseFromString(html, 'text/html');
 
-						// Remove the h1/meta tags if they duplicate what we already have,
-						// or just inject the whole body.
-						// Here we inject everything inside <body>
-						this.contentDiv.innerHTML = doc.body.innerHTML;
-					} catch(e) {
-						this.contentDiv.innerHTML = `<p class="text-[#e06c75]">Error loading post: ${e.message}</p>`;
+							const authorMeta = doc.querySelector('meta[name="author"]');
+
+							if (authorMeta && authorMeta.content) {
+								const authorName = authorMeta.content;
+
+								const authorHtml = `<p class="text-sm text-[#5c6370] mb-8 -mt-2">Written by <span class="text-[#c678dd] font-semibold">${authorName}</span></p>`;
+
+								const h1 = doc.querySelector('h1');
+								if (h1) {
+									h1.insertAdjacentHTML('afterend', authorHtml);
+								} else {
+									doc.body.insertAdjacentHTML('afterbegin', authorHtml);
+								}
+							}
+
+							this.contentDiv.innerHTML = doc.body.innerHTML;
+						} catch(e) {
+							this.contentDiv.innerHTML = `<p class="text-[#e06c75]">Error loading post: ${e.message}</p>`;
+						}
 					}
-				}
-
-				initSearch() {
+					initSearch() {
 					const input = document.getElementById('post-search');
 					if(!input) return;
 

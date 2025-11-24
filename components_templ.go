@@ -80,7 +80,7 @@ func Index(posts []Post) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("// Rebooter")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 90, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 89, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -125,7 +125,7 @@ func Index(posts []Post) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(author.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 174, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 173, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -138,7 +138,7 @@ func Index(posts []Post) templ.Component {
 			var templ_7745c5c3_Var4 templ.SafeURL
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(author.Github))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 176, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 175, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -151,7 +151,7 @@ func Index(posts []Post) templ.Component {
 			var templ_7745c5c3_Var5 templ.SafeURL
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(author.Linkedin))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 178, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 177, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -164,7 +164,7 @@ func Index(posts []Post) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(author.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 182, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 181, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -192,7 +192,7 @@ func Index(posts []Post) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div></section></main><footer class=\"border-t border-[#5c6370] mt-20 py-8 text-center text-[#5c6370]\"><p>&copy; 2025 Connal J. McInnis & Keshav Italia. Built with Go & Templ.</p></footer><script>\n\t\t\tclass BlogApp {\n\t\t\t\tconstructor() {\n\t\t\t\t\tthis.pages = document.querySelectorAll('.page');\n\t\t\t\t\tthis.contentDiv = document.getElementById('post-content');\n\t\t\t\t\tthis.initRouter();\n\t                this.initMobileMenu();\n\t\t\t\t\tthis.initSearch();\n\t\t\t\t\tthis.initTypewriter();\n\t\t\t\t\tthis.initObservers();\n\t\t\t\t}\n\n\t\t\t\t// Simple Hash Router\n\t\t\t\tinitRouter() {\n\t\t\t\t\twindow.addEventListener('hashchange', () => this.handleRoute());\n\t\t\t\t\tthis.handleRoute();\n\n\t\t\t\t\tdocument.getElementById('back-btn').addEventListener('click', () => {\n\t\t\t\t\t\twindow.location.hash = '#blog';\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tasync handleRoute() {\n\t\t\t\t\tconst hash = window.location.hash || '#home';\n\n\t\t\t\t\tif (hash.startsWith('#post/')) {\n\t\t\t\t\t\tconst postId = hash.replace('#post/', '');\n\t\t\t\t\t\tawait this.loadPost(postId);\n\t\t\t\t\t\tthis.showPage('post-view');\n\t\t\t\t\t} else {\n\t\t\t\t\t\tthis.showPage(hash.replace('#', ''));\n\t\t\t\t\t}\n\t\t\t\t\twindow.scrollTo(0,0);\n\t\t\t\t}\n\n\t\t\t\tshowPage(id) {\n\t\t\t\t\tthis.pages.forEach(p => {\n\t\t\t\t\t\tif(p.id === id) {\n\t\t\t\t\t\t\tp.classList.remove('hidden');\n\t\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\t\tp.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible'));\n\t\t\t\t\t\t\t}, 50);\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\tp.classList.add('hidden');\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tasync loadPost(id) {\n\t\t\t\t\tthis.contentDiv.innerHTML = '<p class=\"text-center animate-pulse\">Loading content...</p>';\n\t\t\t\t\ttry {\n\t\t\t\t\t\t// Fetch the original HTML file\n\t\t\t\t\t\tconst res = await fetch(`posts/${id}.html`);\n\t\t\t\t\t\tif(!res.ok) throw new Error('Post not found');\n\t\t\t\t\t\tconst html = await res.text();\n\n\t\t\t\t\t\t// Parse the HTML to extract just the <body> content\n\t\t\t\t\t\tconst doc = new DOMParser().parseFromString(html, 'text/html');\n\n\t\t\t\t\t\t// Remove the h1/meta tags if they duplicate what we already have,\n\t\t\t\t\t\t// or just inject the whole body.\n\t\t\t\t\t\t// Here we inject everything inside <body>\n\t\t\t\t\t\tthis.contentDiv.innerHTML = doc.body.innerHTML;\n\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\tthis.contentDiv.innerHTML = `<p class=\"text-[#e06c75]\">Error loading post: ${e.message}</p>`;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tinitSearch() {\n\t\t\t\t\tconst input = document.getElementById('post-search');\n\t\t\t\t\tif(!input) return;\n\n\t\t\t\t\tinput.addEventListener('input', (e) => {\n\t\t\t\t\t\tconst term = e.target.value.toLowerCase();\n\t\t\t\t\t\tconst posts = document.querySelectorAll('#all-posts article');\n\t\t\t\t\t\tposts.forEach(post => {\n\t\t\t\t\t\t\tconst title = post.querySelector('h3').textContent.toLowerCase();\n\t\t\t\t\t\t\tconst excerpt = post.querySelector('.excerpt').textContent.toLowerCase();\n\t\t\t\t\t\t\tif(title.includes(term) || excerpt.includes(term)) {\n\t\t\t\t\t\t\t\tpost.style.display = 'block';\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tpost.style.display = 'none';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tinitTypewriter() {\n\t\t\t\t\tconst el = document.getElementById('typewriter');\n\t\t\t\t\tif(!el) return;\n\t\t\t\t\tconst roles = [\n\t\t\t\t\t\t\"Software Engineers\",\n\t\t\t\t\t\t\"Cybersecurity Researchers\",\n\t\t\t\t\t\t\"Free Software Advocates\",\n\t\t\t\t\t\t\"Technology Consultants\",\n\t\t\t\t\t\t\"Data Scientists\",\n\t\t\t\t\t\t\"Linux Enthusiasts\",\n\t\t\t\t\t\t\"Software Architects\",\n\t\t\t\t\t\t\"Legacy Modernizers\",\n\t\t\t\t\t\t\"Platform Builders\",\n\t\t\t\t\t\t\"Daemon Slayers\",\n\t\t\t\t\t\t\"Unix Wizards\",\n\t\t\t\t\t\t\"Coffee-Driven Developers\",\n\t\t\t\t\t\t\"Documentation Meditators\",\n\t\t\t\t\t\t\"GNU/Programmers\",\n\t\t\t\t\t\t\"idots\"\n\t\t\t\t\t];\n\t\t\t\t\tlet roleIdx = 0, charIdx = 0, isDeleting = false;\n\n\t\t\t\t\tconst type = () => {\n\t\t\t\t\t\tconst current = roles[roleIdx];\n\t\t\t\t\t\tel.textContent = current.substring(0, charIdx + (isDeleting ? -1 : 1));\n\t\t\t\t\t\tcharIdx += isDeleting ? -1 : 1;\n\n\t\t\t\t\t\tif (!isDeleting && charIdx === current.length) {\n\t\t\t\t\t\t\tsetTimeout(() => isDeleting = true, 2000);\n\t\t\t\t\t\t} else if (isDeleting && charIdx === 0) {\n\t\t\t\t\t\t\tisDeleting = false;\n\t\t\t\t\t\t\troleIdx = (roleIdx + 1) % roles.length;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tsetTimeout(type, isDeleting ? 100 : 150);\n\t\t\t\t\t};\n\t\t\t\t\ttype();\n\t\t\t\t}\n\n\t\t\t\tinitObservers() {\n\t\t\t\t\tconst observer = new IntersectionObserver((entries) => {\n\t\t\t\t\t\tentries.forEach(entry => {\n\t\t\t\t\t\t\tif(entry.isIntersecting) {\n\t\t\t\t\t\t\t\tentry.target.classList.add('visible');\n\t\t\t\t\t\t\t\tobserver.unobserve(entry.target);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t}, { threshold: 0.1 });\n\n\t\t\t\t\tdocument.querySelectorAll('.fade-in').forEach(el => observer.observe(el));\n\t\t\t\t}\n\n\t\t\t\tinitMobileMenu() {\n\t\t\t\t\tconst btn = document.getElementById('mobile-menu-btn');\n\t\t\t\t\tconst menu = document.getElementById('mobile-menu');\n\t\t\t\t\tif(btn && menu) {\n\t\t\t\t\t\t// Toggle menu visibility\n\t\t\t\t\t\tbtn.addEventListener('click', () => {\n\t\t\t\t\t\t\tmenu.classList.toggle('hidden');\n\t\t\t\t\t\t});\n\t\t\t\t\t\t// Close menu when a link is clicked\n\t\t\t\t\t\tmenu.querySelectorAll('.mobile-link').forEach(link => {\n\t\t\t\t\t\t\tlink.addEventListener('click', () => {\n\t\t\t\t\t\t\t\tmenu.classList.add('hidden');\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tdocument.addEventListener('DOMContentLoaded', () => new BlogApp());\n\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div></section></main><footer class=\"border-t border-[#5c6370] mt-20 py-8 text-center text-[#5c6370]\"><p>&copy; 2025 Connal J. McInnis & Keshav Italia. Built with Go & Templ.</p></footer><script>\n\t\t\tclass BlogApp {\n\t\t\t\tconstructor() {\n\t\t\t\t\tthis.pages = document.querySelectorAll('.page');\n\t\t\t\t\tthis.contentDiv = document.getElementById('post-content');\n\t\t\t\t\tthis.initRouter();\n\t                this.initMobileMenu();\n\t\t\t\t\tthis.initSearch();\n\t\t\t\t\tthis.initTypewriter();\n\t\t\t\t\tthis.initObservers();\n\t\t\t\t}\n\n\t\t\t\t// Simple Hash Router\n\t\t\t\tinitRouter() {\n\t\t\t\t\twindow.addEventListener('hashchange', () => this.handleRoute());\n\t\t\t\t\tthis.handleRoute();\n\n\t\t\t\t\tdocument.getElementById('back-btn').addEventListener('click', () => {\n\t\t\t\t\t\twindow.location.hash = '#blog';\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tasync handleRoute() {\n\t\t\t\t\tconst hash = window.location.hash || '#home';\n\n\t\t\t\t\tif (hash.startsWith('#post/')) {\n\t\t\t\t\t\tconst postId = hash.replace('#post/', '');\n\t\t\t\t\t\tawait this.loadPost(postId);\n\t\t\t\t\t\tthis.showPage('post-view');\n\t\t\t\t\t} else {\n\t\t\t\t\t\tthis.showPage(hash.replace('#', ''));\n\t\t\t\t\t}\n\t\t\t\t\twindow.scrollTo(0,0);\n\t\t\t\t}\n\n\t\t\t\tshowPage(id) {\n\t\t\t\t\tthis.pages.forEach(p => {\n\t\t\t\t\t\tif(p.id === id) {\n\t\t\t\t\t\t\tp.classList.remove('hidden');\n\t\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\t\tp.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible'));\n\t\t\t\t\t\t\t}, 50);\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\tp.classList.add('hidden');\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tasync loadPost(id) {\n\t\t\t\t\t    this.contentDiv.innerHTML = '<p class=\"text-center animate-pulse\">Loading content...</p>';\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tconst res = await fetch(`posts/${id}.html`);\n\t\t\t\t\t\t\tif(!res.ok) throw new Error('Post not found');\n\t\t\t\t\t\t\tconst html = await res.text();\n\n\t\t\t\t\t\t\tconst doc = new DOMParser().parseFromString(html, 'text/html');\n\n\t\t\t\t\t\t\tconst authorMeta = doc.querySelector('meta[name=\"author\"]');\n\n\t\t\t\t\t\t\tif (authorMeta && authorMeta.content) {\n\t\t\t\t\t\t\t\tconst authorName = authorMeta.content;\n\n\t\t\t\t\t\t\t\tconst authorHtml = `<p class=\"text-sm text-[#5c6370] mb-8 -mt-2\">Written by <span class=\"text-[#c678dd] font-semibold\">${authorName}</span></p>`;\n\n\t\t\t\t\t\t\t\tconst h1 = doc.querySelector('h1');\n\t\t\t\t\t\t\t\tif (h1) {\n\t\t\t\t\t\t\t\t\th1.insertAdjacentHTML('afterend', authorHtml);\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\tdoc.body.insertAdjacentHTML('afterbegin', authorHtml);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\n\t\t\t\t\t\t\tthis.contentDiv.innerHTML = doc.body.innerHTML;\n\t\t\t\t\t\t} catch(e) {\n\t\t\t\t\t\t\tthis.contentDiv.innerHTML = `<p class=\"text-[#e06c75]\">Error loading post: ${e.message}</p>`;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tinitSearch() {\n\t\t\t\t\tconst input = document.getElementById('post-search');\n\t\t\t\t\tif(!input) return;\n\n\t\t\t\t\tinput.addEventListener('input', (e) => {\n\t\t\t\t\t\tconst term = e.target.value.toLowerCase();\n\t\t\t\t\t\tconst posts = document.querySelectorAll('#all-posts article');\n\t\t\t\t\t\tposts.forEach(post => {\n\t\t\t\t\t\t\tconst title = post.querySelector('h3').textContent.toLowerCase();\n\t\t\t\t\t\t\tconst excerpt = post.querySelector('.excerpt').textContent.toLowerCase();\n\t\t\t\t\t\t\tif(title.includes(term) || excerpt.includes(term)) {\n\t\t\t\t\t\t\t\tpost.style.display = 'block';\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tpost.style.display = 'none';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t}\n\n\t\t\t\tinitTypewriter() {\n\t\t\t\t\tconst el = document.getElementById('typewriter');\n\t\t\t\t\tif(!el) return;\n\t\t\t\t\tconst roles = [\n\t\t\t\t\t\t\"Software Engineers\",\n\t\t\t\t\t\t\"Cybersecurity Researchers\",\n\t\t\t\t\t\t\"Free Software Advocates\",\n\t\t\t\t\t\t\"Technology Consultants\",\n\t\t\t\t\t\t\"Data Scientists\",\n\t\t\t\t\t\t\"Linux Enthusiasts\",\n\t\t\t\t\t\t\"Software Architects\",\n\t\t\t\t\t\t\"Legacy Modernizers\",\n\t\t\t\t\t\t\"Platform Builders\",\n\t\t\t\t\t\t\"Daemon Slayers\",\n\t\t\t\t\t\t\"Unix Wizards\",\n\t\t\t\t\t\t\"Coffee-Driven Developers\",\n\t\t\t\t\t\t\"Documentation Meditators\",\n\t\t\t\t\t\t\"GNU/Programmers\",\n\t\t\t\t\t\t\"idots\"\n\t\t\t\t\t];\n\t\t\t\t\tlet roleIdx = 0, charIdx = 0, isDeleting = false;\n\n\t\t\t\t\tconst type = () => {\n\t\t\t\t\t\tconst current = roles[roleIdx];\n\t\t\t\t\t\tel.textContent = current.substring(0, charIdx + (isDeleting ? -1 : 1));\n\t\t\t\t\t\tcharIdx += isDeleting ? -1 : 1;\n\n\t\t\t\t\t\tif (!isDeleting && charIdx === current.length) {\n\t\t\t\t\t\t\tsetTimeout(() => isDeleting = true, 2000);\n\t\t\t\t\t\t} else if (isDeleting && charIdx === 0) {\n\t\t\t\t\t\t\tisDeleting = false;\n\t\t\t\t\t\t\troleIdx = (roleIdx + 1) % roles.length;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tsetTimeout(type, isDeleting ? 100 : 150);\n\t\t\t\t\t};\n\t\t\t\t\ttype();\n\t\t\t\t}\n\n\t\t\t\tinitObservers() {\n\t\t\t\t\tconst observer = new IntersectionObserver((entries) => {\n\t\t\t\t\t\tentries.forEach(entry => {\n\t\t\t\t\t\t\tif(entry.isIntersecting) {\n\t\t\t\t\t\t\t\tentry.target.classList.add('visible');\n\t\t\t\t\t\t\t\tobserver.unobserve(entry.target);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t}, { threshold: 0.1 });\n\n\t\t\t\t\tdocument.querySelectorAll('.fade-in').forEach(el => observer.observe(el));\n\t\t\t\t}\n\n\t\t\t\tinitMobileMenu() {\n\t\t\t\t\tconst btn = document.getElementById('mobile-menu-btn');\n\t\t\t\t\tconst menu = document.getElementById('mobile-menu');\n\t\t\t\t\tif(btn && menu) {\n\t\t\t\t\t\t// Toggle menu visibility\n\t\t\t\t\t\tbtn.addEventListener('click', () => {\n\t\t\t\t\t\t\tmenu.classList.toggle('hidden');\n\t\t\t\t\t\t});\n\t\t\t\t\t\t// Close menu when a link is clicked\n\t\t\t\t\t\tmenu.querySelectorAll('.mobile-link').forEach(link => {\n\t\t\t\t\t\t\tlink.addEventListener('click', () => {\n\t\t\t\t\t\t\t\tmenu.classList.add('hidden');\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tdocument.addEventListener('DOMContentLoaded', () => new BlogApp());\n\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -229,7 +229,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(post.Date)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 368, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 376, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -242,7 +242,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 370, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 378, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -255,7 +255,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(post.Excerpt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 372, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 380, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -268,7 +268,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var11 templ.SafeURL
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("#post/%s", post.ID)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 373, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 381, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
