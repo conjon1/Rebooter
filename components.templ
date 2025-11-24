@@ -403,7 +403,18 @@ templ Index(posts []Post, authors []AuthorData) {
 // Reusable Component for a single post item
 templ PostItem(post Post) {
 	<article class="group border-l-2 border-[#282c34] pl-4 hover:border-[#61afef] transition-colors">
-		<p class="text-sm text-[#5c6370] mb-1">{ post.Date }</p>
+		<div class="flex items-center text-sm text-[#5c6370] mb-1">
+			<span>{ post.Date }</span>
+			<span class="mx-2">•</span>
+			if post.AuthorID != "" {
+				<a href={ templ.SafeURL(fmt.Sprintf("#author/%s", post.AuthorID)) }
+				   class="hover:text-[#c678dd] transition-colors font-medium">
+					{ post.Author }
+				</a>
+			} else {
+				<span class="font-medium">{ post.Author }</span>
+			}
+		</div>
 		<h3 class="text-2xl font-bold text-[#98c379] group-hover:text-[#c678dd] transition-colors">
 			{ post.Title }
 		</h3>

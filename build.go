@@ -14,17 +14,19 @@ import (
 	"golang.org/x/net/html"
 )
 
+// Shared structs
 type Post struct {
-	ID      string `json:"id"`
-	Title   string `json:"title"`
-	Date    string `json:"date"`
-	Excerpt string `json:"excerpt"`
-	URL     string `json:"url"`
-	Author  string `json:"author"`
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Date     string `json:"date"`
+	Excerpt  string `json:"excerpt"`
+	URL      string `json:"url"`
+	Author   string `json:"author"`
+	AuthorID string `json:"authorId"` // Added to link posts to author pages
 }
 
 type AuthorData struct {
-	ID       string `json:"id"`
+	ID       string `json:"id"` // filename (e.g., "connalmcinnis")
 	Name     string `json:"name"`
 	Linkedin string `json:"linkedin"`
 	Github   string `json:"github"`
@@ -40,7 +42,7 @@ const (
 )
 
 func main() {
-	log.Println("Starting blog build process...")
+	log.Println("⚡ Starting blog build process...")
 
 	posts, err := findAndParsePosts(postsDir)
 	if err != nil {
@@ -53,6 +55,18 @@ func main() {
 		log.Fatalf("Error parsing authors: %v", err)
 	}
 
+	authorMap := make(map[string]string)
+	for _, a := range authors {
+		authorMap[a.Name] = a.ID
+	}
+
+	for i := range posts {
+		if id, ok := authorMap[posts[i].Author]; ok {
+			posts[i].AuthorID = id
+		}
+	}
+
+	// 4. Write JSON data
 	if err := writeJSON(posts, jsonOutput); err != nil {
 		log.Printf("Warning: Could not write posts JSON: %v", err)
 	}
@@ -60,12 +74,14 @@ func main() {
 		log.Printf("Warning: Could not write authors JSON: %v", err)
 	}
 
+	// 5. Render HTML
 	f, err := os.Create(htmlOutput)
 	if err != nil {
 		log.Fatalf("Error creating index.html: %v", err)
 	}
 	defer f.Close()
 
+	// Pass both posts and dynamic authors to the template
 	err = Index(posts, authors).Render(context.Background(), f)
 	if err != nil {
 		log.Fatalf("❌ Error rendering template: %v", err)

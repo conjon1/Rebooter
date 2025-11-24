@@ -5,7 +5,8 @@
     "date": "November 22, 2025",
     "excerpt": "The Therac-25 disaster taught us that bugs in C code can be lethal. Learn why aerospace, automotive, and medical industries now mandate CERT C compliance to prevent vulnerabilities in life-critical systems.",
     "url": "posts/CertCIndustries.html",
-    "author": "Tanveer Salim"
+    "author": "Tanveer Salim",
+    "authorId": "tanveersalim"
   },
   {
     "id": "DockerIsNotASanbox",
@@ -13,7 +14,8 @@
     "date": "November 12, 2025",
     "excerpt": "One of the biggest misconceptions I see about Docker is that it’s somehow sandboxed—a place where you can safely test programs and services in isolation.",
     "url": "posts/DockerIsNotASanbox.html",
-    "author": "Connal McInnis"
+    "author": "Connal McInnis",
+    "authorId": "connalmcinnis"
   },
   {
     "id": "K3S",
@@ -21,6 +23,7 @@
     "date": "October 20, 2025",
     "excerpt": "From a few mini PCs to a fully functional Kubernetes cluster – my homelab journey using Ubuntu and K3s has been full of learning experiences.",
     "url": "posts/K3S.html",
-    "author": "Connal McInnis"
+    "author": "Connal McInnis",
+    "authorId": "connalmcinnis"
   }
 ]
