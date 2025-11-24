@@ -1,14 +1,457 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <meta name="name" content="Tanveer Salim">
-    <meta name="linkedin" content="https://www.linkedin.com/in/fosres">
+    <meta name="linkedin" content="https://linkedin.com/in/fosres">
     <meta name="github" content="https://github.com/fosres">
+
+    <title>Tanveer Salim - Security Engineer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="p-10 text-center">
-        <h2 class="text-2xl text-[#d19a66]">Work in Progress</h2>
-        <p class="mt-4">This author profile is currently being updated.</p>
+    <style>
+        /* SCOPED STYLES FOR REBOOTER THEME INTEGRATION */
+        .resume-scope {
+            /* REBOOTER PALETTE MAPPING */
+            --bg-main: #1e2127;       
+            --bg-card: #282c34;       
+            --text-main: #abb2bf;     
+            --text-muted: #5c6370;    
+            
+            --primary: #61afef;       /* Blue */
+            --secondary: #c678dd;     /* Purple */
+            --accent: #98c379;        /* Green */
+            
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            color: var(--text-main);
+            
+            /* REMOVED: Outer background/border to prevent "double box" look */
+            background: transparent;
+            padding: 0;
+            border: none; 
+            position: relative;
+        }
+
+        /* Subtle Ambient Glow */
+        .resume-scope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(97, 175, 239, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(198, 120, 221, 0.05) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .resume-container {
+            max-width: 100%;
+            margin: 0 auto;
+
+            /* ONE BORDER: This is the single border you requested */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(40, 44, 52, 0.3); /* Very subtle background tint */
+            border-radius: 12px;
+
+            overflow: hidden; /* Keeps content inside the rounded corners */
+            position: relative;
+            z-index: 1;
+            animation: resumeSlideUp 0.8s ease-out forwards;
+            text-align: left;
+        }
+
+        .resume-scope a { text-decoration: none; color: inherit; }
+
+        /* Header Section */
+        .resume-header-bg {
+            /* Subtle top gradient */
+            background: linear-gradient(180deg, rgba(97, 175, 239, 0.08) 0%, transparent 100%);
+            padding: 40px 40px 60px;
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Internal separator only */
+        }
+
+        .resume-header-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(97, 175, 239, 0.05) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        .resume-scope h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            color: var(--primary) !important;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+            text-shadow: 0 4px 20px rgba(97, 175, 239, 0.2);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.2;
+            margin-top: 0;
+        }
+
+        .tagline {
+            font-size: 1.4em;
+            color: var(--secondary);
+            font-weight: 300;
+            margin-bottom: 25px;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Contact Chips */
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.9em;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+            padding: 8px 16px;
+            background: rgba(30, 33, 39, 0.6);
+            border-radius: 50px;
+            border: 1px solid var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            background: rgba(97, 175, 239, 0.1);
+        }
+
+        .contact-item svg { width: 16px; height: 16px; fill: currentColor; }
+
+        /* Content Area */
+        .resume-content {
+            padding: 40px;
+        }
+
+        .resume-section {
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .resume-section:nth-child(1) { animation-delay: 0.2s; }
+        .resume-section:nth-child(2) { animation-delay: 0.4s; }
+        .resume-section:nth-child(3) { animation-delay: 0.6s; }
+        .resume-section:nth-child(4) { animation-delay: 0.8s; }
+
+        .resume-scope h2 {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 0;
+            font-family: 'Inter', sans-serif;
+            border-bottom: 1px solid var(--text-muted);
+            padding-bottom: 10px;
+        }
+
+        /* Job & Project Cards */
+        .job, .project, .education-card {
+            margin-bottom: 25px;
+            padding: 25px;
+            background: rgba(30, 33, 39, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-left: 4px solid var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .job:hover, .project:hover {
+            transform: translateX(5px);
+            background: rgba(40, 44, 52, 0.8);
+            border-left-color: var(--secondary);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .job-header, .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 20px;
+        }
+
+        .job-title, .project-title {
+            font-weight: 700;
+            font-size: 1.3em;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .company {
+            color: var(--text-muted);
+            font-size: 0.95em;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .resume-date {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8em;
+            color: var(--bg-main);
+            background: var(--primary);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .role {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .resume-scope ul {
+            margin-left: 0;
+            margin-top: 15px;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .resume-scope li {
+            margin-bottom: 10px;
+            color: var(--text-main);
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .resume-scope li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-family: 'Fira Code', monospace;
+            font-weight: bold;
+        }
+
+        .highlight {
+            color: var(--accent);
+            font-weight: 600;
+            background: rgba(152, 195, 121, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill-tag {
+            padding: 8px 16px;
+            background: var(--bg-main);
+            color: var(--primary);
+            border: 1px solid var(--text-muted);
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .skill-tag:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(198, 120, 221, 0.2);
+        }
+
+        .education-card {
+            background: linear-gradient(135deg, rgba(40, 44, 52, 0.8) 0%, rgba(30, 33, 39, 0.9) 100%);
+            border-left: 4px solid var(--primary);
+        }
+
+        .degree {
+            color: white;
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        /* Animations */
+        @keyframes resumeSlideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+        }
+
+        @media (max-width: 768px) {
+            .resume-header-bg { padding: 30px 20px; }
+            .resume-content { padding: 30px 20px; }
+            .job-header, .project-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .resume-scope h1 { font-size: 2.5em; }
+        }
+    </style>
+
+    <div class="resume-scope">
+        <div class="resume-container">
+            <div class="resume-header-bg">
+                <header>
+                    <h1>Tanveer Salim</h1>
+                    <div class="tagline">Security Software Engineer</div>
+                    <div class="contact-info">
+                        <a href="mailto:tsjobs@securecryptohub.com" class="contact-item">
+                            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                            Email
+                        </a>
+                        <a href="https://linkedin.com/in/fosres" target="_blank" class="contact-item">
+                            <svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                            LinkedIn
+                        </a>
+                        <a href="https://github.com/fosres" target="_blank" class="contact-item">
+                            <svg viewBox="0 0 24 24"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
+                            GitHub
+                        </a>
+                    </div>
+                </header>
+            </div>
+
+            <div class="resume-content">
+                <section class="resume-section">
+                    <h2>Professional Experience</h2>
+
+                    <div class="job">
+                        <div class="job-header">
+                            <div>
+                                <div class="job-title">Intel Corporation</div>
+                                <div class="company">Remote, United States</div>
+                            </div>
+                            <div class="resume-date">Aug 2022 – Nov 2024</div>
+                        </div>
+                        <div class="role">Security Software Engineer</div>
+                        <ul>
+                            <li>Developed C code for <span class="highlight">XMSS Private Key and Signature Generation</span> based on RFC 8391.</li>
+                            <li>Reported <span class="highlight">65.83% (553+) threats</span> in the Intel TMT Database.</li>
+                            <li>Designed and reviewed Threat Models enabling <span class="highlight">100+ Intel IPAS members</span> to evaluate security.</li>
+                        </ul>
+                    </div>
+
+                    <div class="job">
+                        <div class="job-header">
+                            <div>
+                                <div class="job-title">FortifID</div>
+                                <div class="company">Remote, United States</div>
+                            </div>
+                            <div class="resume-date">Aug 2021 – Jul 2022</div>
+                        </div>
+                        <div class="role">Security Engineer</div>
+                        <ul>
+                            <li>Applied <span class="highlight">STRIDE threat model</span> to uncover 30+ potential attack vectors.</li>
+                            <li>Conducted stress testing of AWS infrastructure via custom <span class="highlight">Golang scripts</span>.</li>
+                            <li>Collaborated with CISO to implement mitigation strategies aligned with <span class="highlight">OWASP Top 10</span>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="job">
+                        <div class="job-header">
+                            <div>
+                                <div class="job-title">Promethium</div>
+                                <div class="company">Startup</div>
+                            </div>
+                            <div class="resume-date">2020 – 2022</div>
+                        </div>
+                        <div class="role">Co-Founder – CTO</div>
+                        <ul>
+                            <li>Built blockchain wallet to inherit assets upon owner's death using <span class="highlight">Shamir Secret Sharing</span>.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="resume-section">
+                    <h2>Projects</h2>
+
+                    <div class="project">
+                        <div class="project-header">
+                            <div class="project-title">CryptoPals</div>
+                            <div class="resume-date">Sep 2025 – Present</div>
+                        </div>
+                        <ul>
+                            <li>Solving cryptopals.com exercises to exploit real-world crypto systems in <span class="highlight">C, Golang, and Rust</span>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="project">
+                        <div class="project-header">
+                            <div class="project-title">Equihash Implementation</div>
+                            <div class="resume-date">Jan 2021 - May 2021</div>
+                        </div>
+                        <ul>
+                            <li>Built full <span class="highlight">C++ implementation of Equihash consensus</span> based on the Equihash whitepaper.</li>
+                        </ul>
+                    </div>
+
+                    <div class="project">
+                        <div class="project-header">
+                            <div class="project-title">RowdyHacks 2020</div>
+                            <div class="resume-date">Mar 2020</div>
+                        </div>
+                        <ul>
+                            <li>Implemented <span class="highlight">ChaCha20 stream cipher</span> as a Linux kernel module (RFC 8439) in under 24 hours.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="resume-section">
+                    <h2>Skills</h2>
+                    <div class="skills-container">
+                        <div class="skill-tag">Threat Modeling</div>
+                        <div class="skill-tag">C</div>
+                        <div class="skill-tag">C++</div>
+                        <div class="skill-tag">Golang</div>
+                        <div class="skill-tag">GNU/Linux</div>
+                        <div class="skill-tag">BASH</div>
+                        <div class="skill-tag">Git</div>
+                        <div class="skill-tag">Vim</div>
+                        <div class="skill-tag">Cryptographic Development</div>
+                    </div>
+                </section>
+
+                <section class="resume-section">
+                    <h2>Education</h2>
+                    <div class="education-card">
+                        <div>
+                            <div class="degree">Bachelor of Science, Computer Engineering</div>
+                            <div class="university">Texas Tech University • Cum Laude</div>
+                        </div>
+                        <div class="resume-date">Graduated May 2021</div>
+                    </div>
+                </section>
+            </div>
+        </div>
     </div>
 </body>
 </html>
