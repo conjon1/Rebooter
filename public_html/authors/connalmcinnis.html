@@ -1,90 +1,605 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- METADATA for build.go parsing -->
     <meta name="name" content="Connal McInnis">
     <meta name="linkedin" content="https://www.linkedin.com/in/connalmcinnis/">
     <meta name="github" content="https://github.com/conjon1">
+
+    <title>Connal McInnis - Cloud & DevOps</title>
+    <!-- Importing fonts to ensure they render correctly in standalone view -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="resume-section">
-        <h2 class="resume-title">About Me</h2>
-        <p>My career started in professional kitchens and finance before I found my passion in IT. I've built Kubernetes clusters from the ground up, managed enterprise-grade firewalls, and worked extensively with Linux systems. My hands-on technical projects are driven by a genuine interest in automation and security. I enjoy solving complex problems, documenting the solutions, and helping others learn along the way. My background has taught me how to lead, manage projects, and stay calm under pressure.</p>
-    </div>
+    <style>
+        /* SCOPED STYLES FOR REBOOTER THEME INTEGRATION */
+        .resume-scope {
+            /* REBOOTER PALETTE MAPPING */
+            --bg-main: #1e2127;       
+            --bg-card: #282c34;       
+            --text-main: #abb2bf;     
+            --text-muted: #5c6370;    
+            
+            --primary: #61afef;       /* Blue */
+            --secondary: #c678dd;     /* Purple */
+            --accent: #98c379;        /* Green */
+            --error: #e06c75;         /* Red */
+            
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            
+            /* Transparent bg to blend with main site */
+            background: transparent;
+            padding: 0;
+            border: none; 
+            position: relative;
+        }
 
-    <div class="resume-section">
-        <h2 class="resume-title">Skills</h2>
-        <ul class="resume-list grid grid-cols-1 md:grid-cols-2 gap-2">
-            <li><strong>Languages:</strong> C, Python, Go, Bash</li>
-            <li><strong>Systems:</strong> Linux (Arch, Debian, Ubuntu, NixOS), Windows</li>
-            <li><strong>Infrastructure:</strong> Kubernetes, Docker, Helm, Firewalls</li>
-            <li><strong>Security:</strong> Active Directory, Encryption, Threat Modeling, NIST</li>
-            <li><strong>Soft Skills:</strong> Leadership, Team Collaboration, Technical Writing, Problem Solving</li>
-        </ul>
-    </div>
+        .resume-container {
+            max-width: 100%;
+            margin: 0 auto;
+            border: 1px solid rgba(97, 175, 239, 0.2); /* Subtle Blue Border */
+            background: rgba(30, 33, 39, 0.4);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            animation: bootUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
 
-    <div class="resume-section">
-        <h2 class="resume-title">Experience</h2>
+        /* Cyberpunk Grid Background Effect */
+        .resume-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 100%;
+            background-image: linear-gradient(rgba(97, 175, 239, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(97, 175, 239, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: -1;
+        }
 
-        <div class="resume-item">
-            <h4>Self-Employed Bookkeeping Consultant</h4>
-            <div class="meta">Oakland, CA | Jan 2025 - Present</div>
-            <p>Independently managed full-cycle bookkeeping, payroll, and financial forecasting for multiple local business clients, demonstrating strong project management and client relations skills.</p>
+        .resume-scope a { text-decoration: none; color: inherit; transition: color 0.2s; }
+
+        /* Header Section */
+        .resume-header-bg {
+            background: linear-gradient(180deg, rgba(30, 33, 39, 0.95) 0%, rgba(30, 33, 39, 0.8) 100%);
+            padding: 40px;
+            border-bottom: 1px solid var(--text-muted);
+            position: relative;
+        }
+
+        /* Glitchy decorative bar */
+        .resume-header-bg::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 30%;
+            height: 2px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .resume-scope h1 {
+            font-family: 'Fira Code', monospace;
+            font-size: 3em;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 10px 0;
+            letter-spacing: -1px;
+            text-shadow: 0 0 15px rgba(97, 175, 239, 0.4);
+        }
+
+        .tagline {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1em;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            height: 1.5em; /* Fixed height to prevent layout jump */
+        }
+
+        .tagline-prefix {
+            color: var(--text-muted);
+            opacity: 0.8;
+        }
+
+        /* Role Cycler Magic */
+        .role-cycler {
+            color: var(--accent);
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Blinking Cursor */
+        .role-cycler::after {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background-color: var(--primary);
+            margin-left: 5px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        /* Text Cycling Animation with Glitch Effect */
+        .role-cycler::before {
+            content: "Cloud & DevOps Engineer"; /* Fallback */
+            animation: cycleRoles 12s step-end infinite, glitch 12s linear infinite;
+        }
+
+        @keyframes cycleRoles {
+            0% { content: "Cloud & DevOps Engineer"; color: var(--accent); }
+            20% { content: "Platform Engineer"; color: var(--primary); }
+            40% { content: "Security Analyst"; color: var(--secondary); }
+            60% { content: "Systems Architect"; color: var(--error); }
+            80% { content: "Linux Specialist"; color: var(--accent); }
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: none; transform: skew(0deg); }
+            19% { text-shadow: none; transform: skew(0deg); }
+            20% { text-shadow: 2px 2px var(--secondary), -2px -2px var(--error); transform: skew(-20deg); }
+            21% { text-shadow: none; transform: skew(0deg); }
+
+            39% { text-shadow: none; transform: skew(0deg); }
+            40% { text-shadow: 2px 2px var(--accent), -2px -2px var(--primary); transform: skew(20deg); }
+            41% { text-shadow: none; transform: skew(0deg); }
+
+            59% { text-shadow: none; transform: skew(0deg); }
+            60% { text-shadow: 2px 2px var(--error), -2px -2px var(--secondary); transform: skew(-10deg); }
+            61% { text-shadow: none; transform: skew(0deg); }
+
+            79% { text-shadow: none; transform: skew(0deg); }
+            80% { text-shadow: 2px 2px var(--primary), -2px -2px var(--accent); transform: skew(10deg); }
+            81% { text-shadow: none; transform: skew(0deg); }
+        }
+
+        /* Contact Chips */
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85em;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+            padding: 6px 14px;
+            background: rgba(40, 44, 52, 0.8);
+            border: 1px solid var(--text-muted);
+            border-radius: 4px; /* Sharper corners for tech look */
+            transition: all 0.2s ease;
+        }
+
+        .contact-item svg { width: 14px; height: 14px; fill: currentColor; }
+
+        /* Content Area */
+        .resume-content { padding: 40px; }
+
+        .resume-section { margin-bottom: 50px; }
+
+        .resume-scope h2 {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.4em;
+            color: var(--accent);
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(152, 195, 121, 0.3);
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap; /* Attempt to keep on one line */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Fallback if it still overflows */
+        }
+
+        /* Terminal prompt style for headers */
+        .resume-scope h2::before {
+            content: 'rebooter@connal:~$ ';
+            color: var(--text-muted);
+            font-size: 0.6em;
+            margin-right: 10px;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        /* Cards (Jobs & Projects) */
+        .card {
+            background: rgba(40, 44, 52, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--text-muted);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .card-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .card-subtitle {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85em;
+            color: var(--secondary);
+        }
+
+        .card-meta {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8em;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .resume-scope ul {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 10px;
+        }
+
+        .resume-scope li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .resume-scope li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-family: 'Fira Code', monospace;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .highlight {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* Skills Grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .skill-item {
+            background: rgba(30, 33, 39, 0.5);
+            border: 1px solid var(--text-muted);
+            color: var(--primary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85em;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+            cursor: default;
+        }
+
+        /* Styles for Soft Skills to replace inline styles */
+        .skill-item.soft {
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        /* Animations */
+        @keyframes bootUp {
+            0% { opacity: 0; transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Media Query for Hover Effects - Only on devices that support hover */
+        @media (hover: hover) {
+            .contact-item:hover {
+                border-color: var(--accent);
+                color: var(--accent);
+                background: rgba(152, 195, 121, 0.1);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            }
+
+            .card:hover {
+                background: rgba(40, 44, 52, 0.7);
+                border-left-color: var(--primary);
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+                transform: translateX(4px);
+            }
+
+            .skill-item:hover {
+                border-color: var(--secondary);
+                color: var(--bg-main) !important; /* Force readable text color on hover */
+                background: var(--secondary);
+                box-shadow: 0 0 15px rgba(198, 120, 221, 0.4);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .resume-header-bg { padding: 30px 20px; }
+            .resume-content { padding: 20px; }
+
+            .resume-scope h1 { font-size: 2em; }
+
+            /* Make command headers smaller on mobile to try and fit one line */
+            .resume-scope h2 {
+                font-size: 0.85em;
+            }
+
+            .card-header { flex-direction: column; gap: 5px; }
+            .skills-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+        }
+    </style>
+
+    <div class="resume-scope">
+        <div class="resume-container">
+            <div class="resume-header-bg">
+                <header>
+                    <h1>Connal McInnis</h1>
+                    <div class="tagline">
+                        <span class="tagline-prefix">your next:</span>
+                        <span class="role-cycler"></span>
+                    </div>
+                    <div class="contact-info">
+                        <a href="mailto:connalmcinnis@gmail.com" class="contact-item">
+                            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                            Email
+                        </a>
+                        <a href="https://linkedin.com/in/connalmcinnis" target="_blank" class="contact-item">
+                            <svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+                            LinkedIn
+                        </a>
+                        <a href="https://github.com/conjon1" target="_blank" class="contact-item">
+                            <svg viewBox="0 0 24 24"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
+                            GitHub
+                        </a>
+                        <a href="Connal%20McInnis%20-%20Resume.pdf" target="_blank" class="contact-item" download="Connal_McInnis_Resume.pdf" style="border-color: var(--secondary); color: var(--secondary);">
+                            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                            Download Resume
+                        </a>
+                    </div>
+                </header>
+            </div>
+
+            <div class="resume-content">
+
+                <section class="resume-section">
+                    <h2>cat summary.txt</h2>
+                    <p style="color: var(--text-main);">
+                        Platform Engineer / SRE / Cloud Specialist specializing in Kubernetes, Go, and Linux systems. Expert in infrastructure automation, security platforms, and incident response with proven operations leadership. Passionate about building resilient distributed systems and hardening environments against modern threats.
+                    </p>
+                </section>
+
+                <section class="resume-section">
+                    <h2>ls ./skills/technical/</h2>
+                    <div class="skills-grid">
+                        <div class="skill-item">Go (Golang)</div>
+                        <div class="skill-item">Python</div>
+                        <div class="skill-item">Bash/Shell</div>
+                        <div class="skill-item">SQL (PostgreSQL)</div>
+                        <div class="skill-item">API Development</div>
+                        <div class="skill-item">Kubernetes (K3s & K8s)</div>
+                        <div class="skill-item">Docker</div>
+                        <div class="skill-item">Linux (Ubuntu, Arch)</div>
+                        <div class="skill-item">IaC</div>
+                        <div class="skill-item">Argo Workflows</div>
+                        <div class="skill-item">Helm</div>
+                        <div class="skill-item">GitOps & CI/CD</div>
+                        <div class="skill-item">Prometheus & Grafana</div>
+                        <div class="skill-item">MinIO (S3)</div>
+                        <div class="skill-item">OPNsense / Firewalls</div>
+                        <div class="skill-item">Threat Modeling (STRIDE)</div>
+                        <div class="skill-item">DAST/SAST (Nuclei)</div>
+                        <div class="skill-item">Cryptography (pgvector)</div>
+                        <div class="skill-item">Incident Response</div>
+                        <div class="skill-item">NIST800-53</div>
+                    </div>
+                </section>
+
+                <section class="resume-section">
+                    <h2>ls ./skills/soft/</h2>
+                    <div class="skills-grid">
+                        <div class="skill-item soft">Crisis Management</div>
+                        <div class="skill-item soft">Cross-functional Comms</div>
+                        <div class="skill-item soft">Technical Documentation</div>
+                        <div class="skill-item soft">Mentorship</div>
+                        <div class="skill-item soft">Agile/Kanban</div>
+                        <div class="skill-item soft">Stakeholder Mgmt</div>
+                        <div class="skill-item soft">Conflict Resolution</div>
+                        <div class="skill-item soft">Systems Thinking</div>
+                        <div class="skill-item soft">Client Relations</div>
+                        <div class="skill-item soft">Rapid Decision Making</div>
+                        <div class="skill-item soft">Analytical Solving</div>
+                        <div class="skill-item soft">Time Management</div>
+                    </div>
+                </section>
+
+                <section class="resume-section">
+                    <h2>./run_projects.sh</h2>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">BeeAttack (Software)</div>
+                            <div class="card-subtitle">Distributed Security Platform</div>
+                        </div>
+                        <p class="card-meta" style="margin-bottom: 10px;">Tech: Kubernetes, Argo, Go, MinIO, pgvector</p>
+                        <ul>
+                            <li><strong>Kubernetes Orchestration:</strong> Architected a scalable vulnerability scanning engine on K3s using Argo Workflows to orchestrate complex DAGs, enabling parallelized execution of security tools across worker nodes.</li>
+                            <li><strong>Go Microservices & Design Patterns:</strong> Developed a unified execution controller using the Command Pattern to normalize disparate CLI interfaces into a standard API. Engineered custom ingestion and inference services to decouple scanning logic.</li>
+                            <li><strong>Offline Semantic Recon (RAG):</strong> Engineered a privacy-first RAG pipeline using PostgreSQL with pgvector and local BERT models to query vulnerability data via natural language without external API calls.</li>
+                            <li><strong>High-Performance Pipeline:</strong> Optimized Kubernetes resource allocation for high-concurrency scanning and implemented automated artifact lifecycle management with MinIO and Grafana.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Rebooter.blog</div>
+                            <div class="card-subtitle">Static Site Generator</div>
+                        </div>
+                        <p class="card-meta" style="margin-bottom: 10px;">Tech: Go, Templ, Vanilla JS</p>
+                        <ul>
+                            <li><strong>SSG Engine Architecture:</strong> Built a bespoke Static Site Generator in Go, leveraging Templ for compile-time HTML type safety and component reusability, reducing runtime errors and build latency.</li>
+                            <li><strong>Zero-Dependency SPA:</strong> Engineered a lightweight Single Page Application router in Vanilla JavaScript, utilizing the Intersection Observer API for efficient lazy loading without heavy frameworks.</li>
+                            <li><strong>Metadata Ingestion Pipeline:</strong> Developed a custom Go parser to traverse raw HTML files, extract metadata, and automatically generate structured JSON APIs to power the frontend.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Homelab & Network Engineering</div>
+                            <div class="card-subtitle">Infrastructure Operations</div>
+                        </div>
+                        <p class="card-meta" style="margin-bottom: 10px;">Tech: K3s, Helm, OPNsense, Protectli, Prometheus</p>
+                        <ul>
+                            <li><strong>Kubernetes Cluster:</strong> Deployed a 3-node K3s cluster on Ubuntu Server 24.04 (Intel N100 mini-PCs) utilizing <span class="highlight">LUKS full-disk encryption</span> for data-at-rest security.</li>
+                            <li><strong>Observability Stack:</strong> Automated the deployment of Prometheus and Grafana via <span class="highlight">Helm</span>, configuring Traefik IngressRoutes to expose dashboards via local DNS (`grafana.local`).</li>
+                            <li><strong>Network Segmentation:</strong> Replaced ISP hardware with <span class="highlight">OPNsense on a Protectli Vault</span> to create isolated subnets for Kubernetes workloads.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Hardware & Cryptography</div>
+                            <div class="card-subtitle">Engineering Projects</div>
+                        </div>
+                        <p class="card-meta" style="margin-bottom: 10px;">Tech: C, Nix, Hardware</p>
+                        <ul>
+                            <li><strong>Hardware Engineering:</strong> Soldered and assembled a Corne v4 Split Keyboard, flashed custom QMK firmware, and fabricated a custom Faraday case to shield the controller from EM fields.</li>
+                            <li><strong>CryptoPals & Nix:</strong> Solving cryptographic challenges in C and Go. Developed a custom <span class="highlight">Nix/Docker environment</span> to handle GnuPG versioning conflicts on Arch Linux (Curve 448 support).</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="resume-section">
+                    <h2>history | grep "experience"</h2>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Bookkeeping Consultant</div>
+                                <div class="card-subtitle">Self-Employed</div>
+                            </div>
+                            <div class="card-meta">Jan 2025 – Present</div>
+                        </div>
+                        <ul>
+                            <li>Managed full-cycle bookkeeping and financial forecasting for 4 food industry clients, translating complex financial data into actionable insights for non-technical stakeholders.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Technical Assistant</div>
+                                <div class="card-subtitle">BeLoved Asheville</div>
+                            </div>
+                            <div class="card-meta">Feb 2023 – Present</div>
+                        </div>
+                        <ul>
+                            <li><strong>Systems Consulting:</strong> Consulted on foundational systems architecture, transitioning manual volunteer tracking to digital workflows serving 4,000+ donors.</li>
+                            <li><strong>Database Management:</strong> Designed and implemented volunteer database schema to track donations and scheduling, improving operational efficiency by 40%.</li>
+                            <li><strong>Technical Documentation:</strong> Created comprehensive system documentation for 15+ staff members with a 95% user satisfaction rate.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Operations Lead / Kitchen Manager</div>
+                                <div class="card-subtitle">Coffeeology & Salvinos</div>
+                            </div>
+                            <div class="card-meta">Mar 2023 – Dec 2025</div>
+                        </div>
+                        <ul>
+                            <li><strong>Incident Management:</strong> Managed high-velocity operations in high-pressure environments, serving as Incident Commander during service disruptions.</li>
+                            <li><strong>SOPs:</strong> Developed and enforced SOPs to maintain 99.9% service continuity and quality standards.</li>
+                            <li><strong>Team Leadership:</strong> Led and mentored teams of 10+ staff, fostering clear communication and rapid problem-solving.</li>
+                            <li><strong>Resource Allocation:</strong> Managed supply chains with strict budget adherence, paralleling capacity planning in IT infrastructure.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Finance Assistant</div>
+                                <div class="card-subtitle">Willard Powell: Talent Acquisition</div>
+                            </div>
+                            <div class="card-meta">Aug 2022 – Mar 2023</div>
+                        </div>
+                        <ul>
+                            <li><strong>Process Optimization:</strong> Developed Python automation scripts that streamlined payroll for 200+ employees, reducing processing time by 50%.</li>
+                            <li><strong>Financial Analysis:</strong> Created Excel-based financial models and dashboards to support budget audits, identifying cost-saving opportunities worth $45K annually.</li>
+                            <li><strong>Cross-Functional Collaboration:</strong> Partnered with HR and accounting to standardize payroll workflows, reducing discrepancies by 80%.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="resume-section">
+                    <h2>cat education.json</h2>
+                    <div class="card" style="border-left-color: var(--secondary);">
+                        <div class="card-header">
+                            <div class="card-title">B.S. Information Technology & Cybersecurity</div>
+                            <div class="card-meta">2024 - 2026</div>
+                        </div>
+                        <div class="card-subtitle">Western Governors University (WGU)</div>
+                    </div>
+
+                    <div class="card" style="border-left-color: var(--secondary);">
+                        <div class="card-header">
+                            <div class="card-title">A.A.S. Accounting and Business Administration</div>
+                            <div class="card-meta">2018 - 2020</div>
+                        </div>
+                        <div class="card-subtitle">McDowell Technical Community College (MTCC)</div>
+                    </div>
+                </section>
+
+                <section class="resume-section">
+                    <h2>ls ./certs/</h2>
+                    <div class="card" style="border-left-color: var(--accent);">
+                        <div class="card-header">
+                            <div class="card-title">Professional Certifications</div>
+                        </div>
+                        <ul>
+                            <li><span class="highlight">Google Cybersecurity Professional Certificate</span></li>
+                            <li><span class="highlight">Introduction to IT Architecture</span></li>
+                            <li>CompTIA A+, Network+, and Security+ (In Progress)</li>
+                        </ul>
+                    </div>
+                </section>
+
+            </div>
         </div>
-
-        <div class="resume-item">
-            <h4>Technical Assistant (Volunteer)</h4>
-            <div class="meta">BeLoved Asheville, Asheville, NC | Feb 2023 - Present</div>
-            <p>Provided consulting on website design and foundational systems architecture, applying systems thinking to solve practical problems for a non-profit organization.</p>
-        </div>
-
-        <div class="resume-item">
-            <h4>Finance Assistant</h4>
-            <div class="meta">Willard Powell: Talent Acquisition (Remote) | Aug 2022 - Mar 2023</div>
-            <p>Supported core finance functions, using Excel, Google Sheets and Python for financial modeling, budgeting and payroll.</p>
-        </div>
-
-        <div class="resume-item">
-            <h4>Sous Chef / Kitchen Manager</h4>
-            <div class="meta">Various Businesses (NC & CA) | Jan 2019 - Present</div>
-            <p>Developed strong leadership, team collaboration, Customer Service, and time management skills while managing operations in fast-paced, high-pressure environments.</p>
-        </div>
-    </div>
-
-    <div class="resume-section">
-        <h2 class="resume-title">Projects</h2>
-
-        <div class="resume-item">
-            <h4>Kubernetes Cluster Design & Administration (Homelab)</h4>
-            <ul class="resume-list">
-                <li>Designed and built multiple Kubernetes clusters from scratch using Ubuntu Server (with LUKS encryption).</li>
-                <li>Used Helm charts and custom YAML manifests, configuring Traefik as the Ingress controller.</li>
-                <li>Implemented a monitoring stack with Prometheus and Grafana for cluster-wide insights.</li>
-            </ul>
-        </div>
-
-        <div class="resume-item">
-            <h4>Network Security & Infrastructure Management</h4>
-            <ul class="resume-list">
-                <li>Configured OPNsense firewall on a dedicated appliance to secure the home network.</li>
-                <li>Authored detailed firewall rules, configured Unbound DNS for enhanced security, and utilized VLANs for segmentation.</li>
-                <li>Explored IDS capabilities using Snort to monitor network traffic for threats.</li>
-            </ul>
-        </div>
-
-        <div class="resume-item">
-            <h4>Personal Blog (Rebooter.blog)</h4>
-            <p>Created and actively maintain a technical blog documenting homelab projects, configurations, challenges encountered, and solutions implemented.</p>
-        </div>
-    </div>
-
-    <div class="resume-section">
-        <h2 class="resume-title">Education & Certifications</h2>
-        <ul class="resume-list">
-            <li><strong>B.S. Information Technology and Cyber Security</strong> - WGU (2024-2026)</li>
-            <li><strong>A.A.S. Accounting and Business Administration</strong> - MTCC (2018-2020)</li>
-            <li>Google Cyber-security Certification</li>
-            <li>Introduction to IT Architecture</li>
-        </ul>
     </div>
 </body>
 </html>
