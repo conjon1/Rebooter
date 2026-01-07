@@ -111,14 +111,14 @@
 <body>
 
     <div class="org-meta">
-        host: Arch linux<br>
+        Host: Arch linux<br>
         Network manager
     </div>
 
     <h1>Spoofing Tmobile</h1>
 
     <h2>Why do i need to spoof?</h2>
-    <p>right now i am in a rural area where it dose not make sense to have WiFi if someones mobile data is unlimited.</p>
+    <p>right now I am in a rural area where it dose not make sense to have WiFi if someones mobile data is unlimited.</p>
     <ul>
         <li>Unlimited mobile high speed data</li>
         <li>10g of hi-speed data<br>the 10g data goes out FAST</li>
@@ -218,8 +218,12 @@ nmcli connection up "Wired connection 2"</code></pre>
     </ul>
 
     <blockquote>
-        <p><strong>NOTE:</strong> most cell providers don't do DPI unless something trips them up like using an excess of data</p>
+        <p><strong>NOTE:</strong> most cell providers don't do DPI unless something trips them up like using an excess amount of data</p>
     </blockquote>
+    <blockquote>
+        <p><strong>NOTE:</strong>Remember to do <code>rm /etc/sysctl.d/99-hotspot.conf</code> when going back to normal internet</p>
+    </blockquote>
+
 
 </body>
 </html>
