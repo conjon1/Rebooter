@@ -55,6 +55,13 @@ templ Index(posts []Post, authors []AuthorData) {
 			.prose code { font-family: 'Fira Code', monospace; background: #2c313a; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; }
 			.prose a { color: var(--secondary); text-decoration: underline; }
 			.prose blockquote { border-left: 4px solid var(--fg-alt); padding-left: 1rem; font-style: italic; color: var(--fg-alt); }
+
+			/* Table Styling */
+			.prose table { border-collapse: collapse; width: 100%; margin: 1em 0; background-color: var(--bg-alt); border-radius: 8px; overflow: hidden; border: 1px solid #3e4452; }
+			.prose th, .prose td { text-align: left; padding: 12px; border-bottom: 1px solid #3e4452; border-right: 1px solid #3e4452; }
+			.prose th { background-color: #21252b; color: var(--primary); font-weight: 600; }
+			.prose tr:last-child td { border-bottom: none; }
+			.prose td:last-child, .prose th:last-child { border-right: none; }
 		</style>
 	</head>
 	<body class="bg-[#1e2127] text-[#abb2bf] antialiased">
