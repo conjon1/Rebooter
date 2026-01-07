@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>T-mobile TTL spoofing</title>
+    <meta name="date" content="January 6, 2026">
+    <meta name="excerpt" content="Right now i am in a rural area where it dose not make sense to have WiFi if someones mobile data is unlimited.">
+    <meta name="author" content="Connal McInnis">
+    <meta name="tags" content="hacking, arch, linux">
+
+    <style>
+        /* Basic styling matching Rebooter theme components */
+        body { 
+            line-height: 1.6; 
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            color: #abb2bf;
+        }
+        
+        h1, h2, h3, h4, h5 { line-height: 1.2; margin-top: 1.5em; font-family: 'Fira Code', monospace; }
+        h1 { color: #61afef; font-size: 2em; }
+        h2 { color: #c678dd; font-size: 1.5em; border-bottom: 1px solid #3e4452; padding-bottom: 5px; }
+        h3 { color: #98c379; font-size: 1.25em; }
+        
+        code { 
+            background-color: #282c34; 
+            color: #e06c75;
+            padding: 2px 5px; 
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1em;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #3e4452;
+            margin: 1em 0;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: 0.95em;
+        }
+        strong {
+            font-weight: bold;
+            color: #d19a66;
+        }
+        blockquote {
+            border-left: 4px solid #61afef;
+            padding-left: 1em;
+            margin: 1.5em 0;
+            font-style: italic;
+            color: #5c6370;
+            background: rgba(40, 44, 52, 0.5);
+            padding: 10px 10px 10px 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        ul {
+            list-style-type: disc;
+            padding-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+            background-color: #282c34;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #3e4452;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #3e4452;
+            border-right: 1px solid #3e4452;
+        }
+        th {
+            background-color: #21252b;
+            color: #61afef;
+            font-weight: 600;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        td:last-child, th:last-child {
+            border-right: none;
+        }
+        .org-meta {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #5c6370;
+            margin-bottom: 2rem;
+            border-bottom: 1px dashed #5c6370;
+            padding-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="org-meta">
+        host: Arch linux<br>
+        Network manager
+    </div>
+
+    <h1>Spoofing Tmobile</h1>
+
+    <h2>Why do i need to spoof?</h2>
+    <p>right now i am in a rural area where it dose not make sense to have WiFi if someones mobile data is unlimited.</p>
+    <ul>
+        <li>Unlimited mobile high speed data</li>
+        <li>10g of hi-speed data<br>the 10g data goes out FAST</li>
+    </ul>
+
+    <h2>What I did</h2>
+
+    <h3>Step one: Make File</h3>
+    <pre><code>sudo vim /etc/sysctl.d/99-hotspot.conf</code></pre>
+    <ul>
+        <li>Then inside the file</li>
+    </ul>
+    <pre><code>net.ipv4.ip_default_ttl=65
+net.ipv6.conf.all.hop_limit=65</code></pre>
+    <p><strong>sudo sysctl --system</strong> OR reboot</p>
+
+    <blockquote>
+        <p><strong>NOTE:</strong> i had to disable ipv6 the tower could tell that it was not moblie data traffic</p>
+    </blockquote>
+
+    <pre><code>nmcli connection modify "Wired connection 2" ipv6.method "disabled"
+nmcli connection up "Wired connection 2"</code></pre>
+
+    <h3>Step Two: Phone in USB Tether mode</h3>
+    <p>There are two reasons for this</p>
+    <ul>
+        <li>1: More stable connection</li>
+        <li>2: some carriers have a specific APNs that trigger by just turning on the hotspot, USB tethering circumvents that alltogether and you dont need to turn on the hotspot</li>
+    </ul>
+
+    <blockquote>
+        <p><strong>NOTE:</strong> When put into tethering, Android creates a virtual ethernet interface on the computer. This is distinct from the phone's internal rmnet mobile data interface, but it bypasses standard Wi-Fi hotspot routing.</p>
+    </blockquote>
+
+    <h3>Step Three: VPN or proxy</h3>
+    <p>Turn on your VPN or Proxy of choice inside your browser/computer<br>
+    NOT THE PHONE<br>
+    if you run the VPN on your phone and not your computer:</p>
+    <ul>
+        <li>Your phone's data is encrypted.</li>
+        <li>Your tethered laptop's data bypasses the encryption entirely and goes naked to the carrier.</li>
+    </ul>
+    <p>which is pretty wild but makes sense<br>
+    This is to get around any DPI techniques that the carrier uses<br>
+    (can also just run a vpn on both)</p>
+
+    <h2>Why This Works</h2>
+
+    <h3>The TTL "Hop" Logic</h3>
+    <ul>
+        <li>Every router the data passes through subtracts 1 from the TTL (Time To Live) count</li>
+        <li>Phone default TTL: 64</li>
+        <li>Laptop default TTL: 64</li>
+    </ul>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Origin</th>
+                <th>Start TTL</th>
+                <th>Phone Hop (-1)</th>
+                <th>Carrier Sees</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Phone</td>
+                <td>64</td>
+                <td>N/A</td>
+                <td>64</td>
+                <td>Safe</td>
+            </tr>
+            <tr>
+                <td>Laptop</td>
+                <td>64</td>
+                <td>64 - 1</td>
+                <td>63</td>
+                <td>Throttled</td>
+            </tr>
+            <tr>
+                <td>Spoofed</td>
+                <td>65</td>
+                <td>65 - 1</td>
+                <td>64</td>
+                <td>Safe</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Why the VPN matters</h3>
+    <ul>
+        <li>TTL tricks the counter, VPN tricks the "inspector"</li>
+        <li>Carrier uses DPI (Deep Packet Inspection) to check packet headers for desktop signatures (e.g. "Arch Linux" or "Mozilla/5.0 X11")</li>
+        <li>VPN wraps the data in a locked box</li>
+        <li>Carrier sees: Correct TTL (64) + Encrypted Garbage = Assumes it's just a secure phone app</li>
+    </ul>
+
+    <blockquote>
+        <p><strong>NOTE:</strong> most cell providers don't do DPI unless something trips them up like using an excess of data</p>
+    </blockquote>
+
+</body>
+</html>

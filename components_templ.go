@@ -48,14 +48,14 @@ func Index(posts []Post, authors []AuthorData) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" class=\"scroll-smooth\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Rebooter | Blog</title><script src=\"https://cdn.tailwindcss.com\"></script><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin=\"anonymous\"><link href=\"https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Inter:wght@400;500;700&display=swap\" rel=\"stylesheet\"><style>\n\t\t\t:root {\n\t\t\t\t--bg: #1e2127; --bg-alt: #282c34; --fg: #abb2bf; --fg-alt: #5c6370;\n\t\t\t\t--primary: #61afef; --secondary: #c678dd; --accent: #98c379;\n\t\t\t\t--warning: #d19a66; --error: #e06c75;\n\t\t\t}\n\t\t\tbody { background-color: var(--bg); color: var(--fg); font-family: 'Inter', sans-serif; }\n\t\t\th1, h2, h3, h4, h5, h6, .font-mono { font-family: 'Fira Code', monospace; }\n\t\t\t.fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }\n\t\t\t.fade-in.visible { opacity: 1; transform: translateY(0); }\n\n\t\t\t/* Typewriter cursor */\n\t\t\t.cursor { display: inline-block; width: 8px; height: 1.2em; background-color: var(--primary); animation: blink 0.7s infinite; vertical-align: middle; }\n\t\t\t@keyframes blink { 50% { opacity: 0; } }\n\n\t\t\t/* Markdown/Post Content Styling */\n\t\t\t.prose h1 { font-size: 2rem; color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem; }\n\t\t\t.prose h2 { font-size: 1.5rem; color: var(--secondary); margin-top: 1.5rem; margin-bottom: 0.75rem; }\n\t\t\t.prose h3 { font-size: 1.25rem; color: var(--accent); margin-top: 1.5rem; margin-bottom: 0.5rem; }\n\t\t\t.prose p { margin-bottom: 1rem; line-height: 1.7; }\n\t\t\t.prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }\n\t\t\t.prose pre { background: var(--bg-alt); padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }\n\t\t\t.prose code { font-family: 'Fira Code', monospace; background: #2c313a; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; }\n\t\t\t.prose a { color: var(--secondary); text-decoration: underline; }\n\t\t\t.prose blockquote { border-left: 4px solid var(--fg-alt); padding-left: 1rem; font-style: italic; color: var(--fg-alt); }\n\t\t</style></head><body class=\"bg-[#1e2127] text-[#abb2bf] antialiased\"><header class=\"bg-[#282c34]/80 backdrop-blur-md sticky top-0 z-50 border-b border-[#5c6370]\"><div class=\"container mx-auto px-6 py-4 flex justify-between items-center\"><a href=\"#home\" class=\"text-xl font-bold font-mono text-[#61afef]\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" class=\"scroll-smooth\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Rebooter | Blog</title><script src=\"https://cdn.tailwindcss.com\"></script><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin=\"anonymous\"><link href=\"https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Inter:wght@400;500;700&display=swap\" rel=\"stylesheet\"><style>\n\t\t\t:root {\n\t\t\t\t--bg: #1e2127; --bg-alt: #282c34; --fg: #abb2bf; --fg-alt: #5c6370;\n\t\t\t\t--primary: #61afef; --secondary: #c678dd; --accent: #98c379;\n\t\t\t\t--warning: #d19a66; --error: #e06c75;\n\t\t\t}\n\t\t\tbody { background-color: var(--bg); color: var(--fg); font-family: 'Inter', sans-serif; }\n\t\t\th1, h2, h3, h4, h5, h6, .font-mono { font-family: 'Fira Code', monospace; }\n\t\t\t.fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }\n\t\t\t.fade-in.visible { opacity: 1; transform: translateY(0); }\n\n\t\t\t/* Typewriter cursor */\n\t\t\t.cursor { display: inline-block; width: 8px; height: 1.2em; background-color: var(--primary); animation: blink 0.7s infinite; vertical-align: middle; }\n\t\t\t@keyframes blink { 50% { opacity: 0; } }\n\n\t\t\t/* Markdown/Post Content Styling */\n\t\t\t.prose h1 { font-size: 2rem; color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem; }\n\t\t\t.prose h2 { font-size: 1.5rem; color: var(--secondary); margin-top: 1.5rem; margin-bottom: 0.75rem; }\n\t\t\t.prose h3 { font-size: 1.25rem; color: var(--accent); margin-top: 1.5rem; margin-bottom: 0.5rem; }\n\t\t\t.prose p { margin-bottom: 1rem; line-height: 1.7; }\n\t\t\t.prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }\n\t\t\t.prose pre { background: var(--bg-alt); padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }\n\t\t\t.prose code { font-family: 'Fira Code', monospace; background: #2c313a; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; }\n\t\t\t.prose a { color: var(--secondary); text-decoration: underline; }\n\t\t\t.prose blockquote { border-left: 4px solid var(--fg-alt); padding-left: 1rem; font-style: italic; color: var(--fg-alt); }\n\n\t\t\t/* Table Styling */\n\t\t\t.prose table { border-collapse: collapse; width: 100%; margin: 1em 0; background-color: var(--bg-alt); border-radius: 8px; overflow: hidden; border: 1px solid #3e4452; }\n\t\t\t.prose th, .prose td { text-align: left; padding: 12px; border-bottom: 1px solid #3e4452; border-right: 1px solid #3e4452; }\n\t\t\t.prose th { background-color: #21252b; color: var(--primary); font-weight: 600; }\n\t\t\t.prose tr:last-child td { border-bottom: none; }\n\t\t\t.prose td:last-child, .prose th:last-child { border-right: none; }\n\t\t</style></head><body class=\"bg-[#1e2127] text-[#abb2bf] antialiased\"><header class=\"bg-[#282c34]/80 backdrop-blur-md sticky top-0 z-50 border-b border-[#5c6370]\"><div class=\"container mx-auto px-6 py-4 flex justify-between items-center\"><a href=\"#home\" class=\"text-xl font-bold font-mono text-[#61afef]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("// Rebooter")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 64, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 71, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -106,7 +106,7 @@ func Index(posts []Post, authors []AuthorData) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(author.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 151, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 158, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -124,7 +124,7 @@ func Index(posts []Post, authors []AuthorData) templ.Component {
 				var templ_7745c5c3_Var4 templ.SafeURL
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(author.Github))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 154, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 161, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -143,7 +143,7 @@ func Index(posts []Post, authors []AuthorData) templ.Component {
 				var templ_7745c5c3_Var5 templ.SafeURL
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(author.Linkedin))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 158, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 165, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -161,7 +161,7 @@ func Index(posts []Post, authors []AuthorData) templ.Component {
 			var templ_7745c5c3_Var6 templ.SafeURL
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("#author/%s", author.ID)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 161, Col: 71}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 168, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -174,7 +174,7 @@ func Index(posts []Post, authors []AuthorData) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(author.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 165, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 172, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -239,7 +239,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(post.Date)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 407, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 414, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -257,7 +257,7 @@ func PostItem(post Post) templ.Component {
 			var templ_7745c5c3_Var10 templ.SafeURL
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("#author/%s", post.AuthorID)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 410, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 417, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -270,7 +270,7 @@ func PostItem(post Post) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(post.Author)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 412, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 419, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -288,7 +288,7 @@ func PostItem(post Post) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(post.Author)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 415, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 422, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -306,7 +306,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 419, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 426, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -319,7 +319,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(post.Excerpt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 421, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 428, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -332,7 +332,7 @@ func PostItem(post Post) templ.Component {
 		var templ_7745c5c3_Var15 templ.SafeURL
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("#post/%s", post.ID)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 422, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components.templ`, Line: 429, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {

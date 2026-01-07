@@ -1,5 +1,14 @@
 [
   {
+    "id": "TmobileSpoof",
+    "title": "T-mobile TTL spoofing",
+    "date": "January 6, 2026",
+    "excerpt": "Right now i am in a rural area where it dose not make sense to have WiFi if someones mobile data is unlimited.",
+    "url": "posts/TmobileSpoof.html",
+    "author": "Connal McInnis",
+    "authorId": "connalmcinnis"
+  },
+  {
     "id": "CertCIndustries",
     "title": "Industries in Demand for CERT C Compliant Security-Focused Coders",
     "date": "November 22, 2025",
