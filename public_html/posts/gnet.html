@@ -357,24 +357,47 @@
 
 <h1>Tunneling All System Traffic Through Your Phone with SSH, redsocks, and Mullvad</h1>
 
-<h2>Overview</h2>
-
+<h2>What Is This?</h2>
 <p>
-Routes all system TCP traffic through a SOCKS5 tunnel over USB tethering (or
-WiFi) to an Android phone running Mullvad VPN. DNS is encrypted via
-dnscrypt-proxy over DoH. IPv6 is disabled at runtime to prevent leaks.
-Provides a fully masked public IP for all outbound connections without a
-native VPN client on the host machine.
+If you have a phone with a mobile data plan, you can use it as a fully
+encrypted VPN for your computer — without paying for a separate VPN service
+for the machine itself.
+</p>
+<p>This setup does three things:</p>
+<ol>
+    <li>Routes all your computer's traffic through your phone's internet connection</li>
+    <li>Wraps that traffic in Mullvad VPN running on the phone</li>
+    <li>Encrypts DNS queries so even domain name lookups are hidden</li>
+</ol>
+<p>
+The end result: your computer's traffic looks like it's coming from a Mullvad
+server in another country. Your ISP, your network, anyone on the same WiFi —
+none of them can see what you're doing.
 </p>
 
-<p><strong>Traffic path:</strong></p>
-<div class="path-block">computer (TCP) → iptables → redsocks:12345 → SOCKS5:1080 → SSH → phone → Mullvad → internet</div>
+<h2>How It Works</h2>
+<p>The core idea is a chain of tools, each handing traffic to the next:</p>
+<div class="path-block">your app
+  → iptables (intercepts all outbound TCP)
+    → redsocks (converts to SOCKS5)
+      → SSH tunnel (encrypted pipe to your phone)
+        → phone (running Mullvad VPN)
+          → internet</div>
 
-<p><strong>DNS path (fully resolved — no leak):</strong></p>
-<div class="path-block">computer → resolv.conf (127.0.0.1) → dnscrypt-proxy:53 → DoH/HTTPS:443 → redsocks → tunnel → Mullvad DNS</div>
+<p>And for DNS (domain name lookups):</p>
+<div class="path-block">your app asks "what is google.com?"
+  → resolv.conf points to 127.0.0.1
+    → dnscrypt-proxy (encrypts the query over HTTPS)
+      → goes through the SSH tunnel
+        → Mullvad's DNS servers
+          → answer comes back the same way</div>
+
+<p>
+Without the DNS piece, your computer would leak domain names to your ISP even
+if all your actual traffic was hidden. dnscrypt-proxy closes that gap.
+</p>
 
 <h2>Verified Status <span id="verified-badge">✓ CONFIRMED CLEAN</span></h2>
-
 <p>Confirmed clean via browserleaks.com/dns and ipleak.net:</p>
 <ul>
     <li><strong>Public IP:</strong> Mullvad exit node (Miami, Datacamp Limited)</li>
@@ -384,16 +407,65 @@ native VPN client on the host machine.
     <li><strong>T-Mobile visibility:</strong> encrypted SSH blob only — no destinations, no content, no DNS</li>
 </ul>
 
+<h2>What You Need</h2>
+
+<h3>On your computer (Arch Linux)</h3>
+<pre><code class="language-bash">sudo pacman -S openssh redsocks bind netcat dnscrypt-proxy</code></pre>
+
+<table>
+    <thead><tr><th>package</th><th>what it does</th></tr></thead>
+    <tbody>
+        <tr><td><code>openssh</code></td><td>creates the encrypted tunnel to your phone</td></tr>
+        <tr><td><code>redsocks</code></td><td>intercepts system TCP and forwards it through the tunnel</td></tr>
+        <tr><td><code>iptables</code></td><td>redirects all traffic to redsocks (usually pre-installed)</td></tr>
+        <tr><td><code>dnscrypt-proxy</code></td><td>encrypts DNS queries over HTTPS through the tunnel</td></tr>
+        <tr><td><code>bind</code></td><td>provides the <code>dig</code> command for checking DNS</td></tr>
+        <tr><td><code>netcat</code></td><td>provides <code>nc</code> for port checking</td></tr>
+    </tbody>
+</table>
+
+<h3>On your phone</h3>
+
+<div class="dep-block">
+    <h4>Termux</h4>
+    <ul>
+        <li>A Linux terminal for Android. Available on both the Play Store and F-Droid. The Play Store version works fine, though F-Droid tends to be more up to date.</li>
+        <li><strong>F-Droid:</strong> <a href="https://f-droid.org/packages/com.termux/">https://f-droid.org/packages/com.termux/</a></li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>openssh in Termux</h4>
+    <p>Run this inside Termux to install it, then start the SSH server:</p>
+    <pre><code class="language-bash">pkg install openssh
+sshd</code></pre>
+    <p>Termux's sshd runs on port <code>8022</code> by default (not the standard 22).</p>
+</div>
+
+<div class="dep-block">
+    <h4>Mullvad VPN</h4>
+    <ul>
+        <li>Install from <a href="https://mullvad.net/en/download/android">https://mullvad.net/en/download/android</a> and connect to whichever country you want your traffic to appear from.</li>
+        <li><strong>Important:</strong> go to Settings → Split tunneling and exclude Termux. Without this, Mullvad will try to route Termux's traffic through the VPN too, which breaks the SSH connection your computer depends on.</li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>Termux:Boot (optional)</h4>
+    <ul>
+        <li>Auto-starts <code>sshd</code> when the phone boots. Install from F-Droid, then place a <code>sshd</code> call in <code>$HOME/.termux/boot/</code>.</li>
+        <li><strong>install:</strong> <a href="https://f-droid.org/packages/com.termux.boot/">https://f-droid.org/packages/com.termux.boot/</a></li>
+    </ul>
+</div>
+
 <h2>Commands</h2>
 
 <table>
-    <thead>
-        <tr><th>command</th><th>description</th></tr>
-    </thead>
+    <thead><tr><th>command</th><th>what it does</th></tr></thead>
     <tbody>
-        <tr><td><code>gnet</code></td><td>open SSH tunnel, start redsocks, apply iptables, start dnscrypt, disable IPv6</td></tr>
-        <tr><td><code>gdown</code></td><td>tear down in reverse: iptables, redsocks, ssh, dnscrypt, restore DNS + IPv6</td></tr>
-        <tr><td><code>gstatus</code></td><td>show full state: tunnel, redsocks, ip, dns, system</td></tr>
+        <tr><td><code>gnet</code></td><td>brings the whole tunnel up</td></tr>
+        <tr><td><code>gdown</code></td><td>tears everything down cleanly</td></tr>
+        <tr><td><code>gstatus</code></td><td>shows the current state of every component</td></tr>
     </tbody>
 </table>
 
@@ -409,7 +481,7 @@ native VPN client on the host machine.
 </ol>
 
 <h3>Teardown order (gdown)</h3>
-<p>Reverse of startup — iptables must come down first or network dies:</p>
+<p>Reverse of startup — iptables must come down first or network dies. If you kill the SSH tunnel while iptables is still running, all traffic is still being redirected to a process that no longer exists and your network goes completely dead.</p>
 <ol>
     <li>iptables rules flushed (restores network reachability immediately)</li>
     <li>redsocks stopped</li>
@@ -419,155 +491,43 @@ native VPN client on the host machine.
     <li>IPv6 re-enabled</li>
 </ol>
 
-<h2>Host Dependencies</h2>
+<h3>Reading gstatus</h3>
+<pre><code class="language-bash">[ ssh tunnel ]
+  status   active
+  port     1080
+  pid      3260
+  phone    192.168.76.90  (via enp0s20f0u2)
+[ redsocks ]
+  status   active
+  port     12345
+  iptables routing -> active
+[ ip ]
+  tunnel   45.134.142.196       ← Mullvad IP the world sees
+  real     (redirected)         ← expected when redsocks is active
+  masked   yes (redsocks + iptables confirmed)
+[ dns ]
+  dnscrypt active
+  resolves via  127.0.0.1 (dnscrypt → DoH → tunnel)
+  dig           142.251.31.138  ← confirms DNS is resolving
+  leak          none detected
+[ system ]
+  iface    enp0s20f0u2
+  ttl      65</code></pre>
 
-<div class="dep-block">
-    <h4>openssh</h4>
-    <ul>
-        <li><strong>package:</strong> <code>openssh</code></li>
-        <li><strong>purpose:</strong> creates the SOCKS5 tunnel via <code>ssh -D</code></li>
-        <li><strong>flags:</strong> <code>-f -N -D</code> (background, no command, dynamic forwarding)</li>
-        <li><strong>cipher:</strong> <code><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3554504604070d18525658755a45505b46465d1b565a58">[email&#160;protected]</a></code> (hardware-accelerated via AES-NI)</li>
-        <li><strong>options:</strong> <code>Compression=no</code>, <code>IPQoS=throughput</code>, <code>ConnectTimeout=5</code></li>
-        <li><strong>docs:</strong> <a href="https://www.openssh.com/manual.html">https://www.openssh.com/manual.html</a></li>
-    </ul>
-</div>
-
-<div class="dep-block">
-    <h4>redsocks</h4>
-    <ul>
-        <li><strong>package:</strong> <code>redsocks</code></li>
-        <li><strong>purpose:</strong> intercepts system-wide TCP and redirects through SOCKS5 proxy</li>
-        <li><strong>config:</strong> <code>/tmp/redsocks.conf</code> (generated at runtime by <code>gnet</code>)</li>
-        <li><strong>port:</strong> 12345 (local redirect listener)</li>
-        <li><strong>docs:</strong> <a href="https://github.com/darkk/redsocks">https://github.com/darkk/redsocks</a></li>
-    </ul>
-</div>
-
-<div class="dep-block">
-    <h4>iptables</h4>
-    <ul>
-        <li><strong>package:</strong> <code>iptables</code> (pre-installed)</li>
-        <li><strong>purpose:</strong> intercepts all outbound TCP, sends to redsocks on port 12345</li>
-        <li><strong>chain:</strong> custom <code>REDSOCKS</code> chain in <code>nat</code> table, attached to <code>OUTPUT</code></li>
-        <li><strong>bypassed ranges:</strong> 0/8, 10/8, 127/8, 169.254/16, 172.16/12, 192.168/16, 224/4, 240/4</li>
-        <li><strong>docs:</strong> <a href="https://linux.die.net/man/8/iptables">https://linux.die.net/man/8/iptables</a></li>
-    </ul>
-</div>
-
-<div class="dep-block">
-    <h4>dnscrypt-proxy</h4>
-    <ul>
-        <li><strong>package:</strong> <code>dnscrypt-proxy</code></li>
-        <li><strong>purpose:</strong> encrypts DNS queries via DoH, routes them over TCP through the tunnel</li>
-        <li><strong>listens:</strong> <code>127.0.0.1:53</code></li>
-        <li><strong>server:</strong> <code>mullvad-doh</code></li>
-        <li><strong>config:</strong> <code>/tmp/dnscrypt-proxy.toml</code> (generated at runtime by <code>gnet</code>)</li>
-        <li><strong>log:</strong> <code>/tmp/dnscrypt-proxy.log</code></li>
-        <li><strong>pid:</strong> <code>/tmp/dnscrypt-proxy.pid</code></li>
-        <li><strong>docs:</strong> <a href="https://github.com/DNSCrypt/dnscrypt-proxy">https://github.com/DNSCrypt/dnscrypt-proxy</a></li>
-    </ul>
-</div>
-
-<div class="dep-block">
-    <h4>bind (dig)</h4>
-    <ul>
-        <li><strong>package:</strong> <code>bind</code></li>
-        <li><strong>purpose:</strong> DNS lookup tool used in <code>gstatus</code> to verify DNS is resolving</li>
-        <li><strong>docs:</strong> <a href="https://bind9.readthedocs.io">https://bind9.readthedocs.io</a></li>
-    </ul>
-</div>
-
-<div class="dep-block">
-    <h4>netcat</h4>
-    <ul>
-        <li><strong>package:</strong> <code>netcat</code></li>
-        <li><strong>purpose:</strong> port reachability testing (<code>nc</code>)</li>
-        <li><strong>docs:</strong> <a href="https://netcat.sourceforge.net">https://netcat.sourceforge.net</a></li>
-    </ul>
-</div>
-
-<div class="dep-block">
-    <h4>curl</h4>
-    <ul>
-        <li><strong>package:</strong> <code>curl</code> (pre-installed)</li>
-        <li><strong>purpose:</strong> IP detection in <code>gstatus</code> via <code>--socks5-hostname</code></li>
-        <li><strong>docs:</strong> <a href="https://curl.se/docs/manpage.html">https://curl.se/docs/manpage.html</a></li>
-    </ul>
-</div>
-
-<div class="dep-block">
-    <h4>iproute2 (ip, ss)</h4>
-    <ul>
-        <li><strong>package:</strong> <code>iproute2</code> (pre-installed)</li>
-        <li><strong>purpose:</strong> <code>ip route</code> for gateway/interface detection, <code>ss</code> for tunnel PID lookup</li>
-        <li><strong>docs:</strong> <a href="https://wiki.linuxfoundation.org/networking/iproute2">https://wiki.linuxfoundation.org/networking/iproute2</a></li>
-    </ul>
-</div>
-
-<h2>Phone Dependencies</h2>
-
-<div class="dep-block">
-    <h4>Termux</h4>
-    <ul>
-        <li><strong>platform:</strong> Android (F-Droid recommended over Play Store)</li>
-        <li><strong>purpose:</strong> provides a Linux environment and sshd on the phone</li>
-        <li><strong>install:</strong> <a href="https://f-droid.org/packages/com.termux/">https://f-droid.org/packages/com.termux/</a></li>
-        <li><strong>note:</strong> you can use the appstore version just no start on boot</li>
-    </ul>
-</div>
-
-<div class="dep-block">
-    <h4>Termux:openssh</h4>
-    <ul>
-        <li><strong>package:</strong> <code>openssh</code> (install via <code>pkg install openssh</code> in Termux)</li>
-        <li><strong>purpose:</strong> runs <code>sshd</code> on the phone so the host can tunnel through it</li>
-        <li><strong>default port:</strong> 8022</li>
-        <li><strong>config:</strong> <code>$PREFIX/etc/ssh/sshd_config</code></li>
-        <li><strong>start:</strong> <code>sshd</code> (run manually or on boot via Termux:Boot)</li>
-    </ul>
-</div>
-
-<div class="dep-block">
-    <h4>Termux:Boot (optional)</h4>
-    <ul>
-        <li><strong>package:</strong> Termux:Boot (F-Droid)</li>
-        <li><strong>purpose:</strong> auto-starts <code>sshd</code> when the phone boots</li>
-        <li><strong>setup:</strong> place <code>sshd</code> call in <code>$HOME/.termux/boot/</code></li>
-        <li><strong>install:</strong> <a href="https://f-droid.org/packages/com.termux.boot/">https://f-droid.org/packages/com.termux.boot/</a></li>
-    </ul>
-</div>
-
-<div class="dep-block">
-    <h4>Mullvad VPN (optional, user preference)</h4>
-    <ul>
-        <li><strong>platform:</strong> Android (version 2026.2 tested)</li>
-        <li><strong>purpose:</strong> provides the masked public IP and encrypted upstream connection</li>
-        <li><strong>split tunneling:</strong> Termux must be excluded so the SSH tunnel is not disrupted</li>
-        <li><strong>dns:</strong> 100.64.0.1 (internal — reachable from phone only, not over SOCKS5)</li>
-        <li><strong>note:</strong> Android version does not expose a local SOCKS5 proxy (desktop only)</li>
-        <li><strong>install:</strong> <a href="https://mullvad.net/en/download/android">https://mullvad.net/en/download/android</a></li>
-    </ul>
-</div>
-
-<h2>Configuration Reference</h2>
-
-<h3>gnet variables (top of ~/.bashrc)</h3>
+<h2>Configuration</h2>
+<p>These variables live at the top of the gnet section in <code>~/.bashrc</code>. Change them if your setup differs:</p>
 
 <table>
-    <thead>
-        <tr><th>variable</th><th>default</th><th>description</th></tr>
-    </thead>
+    <thead><tr><th>variable</th><th>default</th><th>what it is</th></tr></thead>
     <tbody>
-        <tr><td><code>GNET_USER</code></td><td>u0_a242</td><td>Termux SSH username</td></tr>
+        <tr><td><code>GNET_USER</code></td><td>u0_a242</td><td>your Termux username (run <code>whoami</code> in Termux)</td></tr>
         <tr><td><code>GNET_PORT</code></td><td>8022</td><td>Termux sshd port</td></tr>
-        <tr><td><code>GNET_PROXY</code></td><td>1080</td><td>local SOCKS5 proxy port</td></tr>
-        <tr><td><code>GNET_REDSOCKS</code></td><td>12345</td><td>redsocks local TCP redirect port</td></tr>
+        <tr><td><code>GNET_PROXY</code></td><td>1080</td><td>local SOCKS5 port SSH creates</td></tr>
+        <tr><td><code>GNET_REDSOCKS</code></td><td>12345</td><td>port redsocks listens on</td></tr>
     </tbody>
 </table>
 
 <h3>redsocks config (generated at <code>/tmp/redsocks.conf</code>)</h3>
-
 <pre><code class="language-nginx">base {
     log_debug  = off;
     log_info   = off;
@@ -584,7 +544,6 @@ redsocks {
 }</code></pre>
 
 <h3>dnscrypt-proxy config (generated at <code>/tmp/dnscrypt-proxy.toml</code>)</h3>
-
 <pre><code class="language-toml">listen_addresses  = ['127.0.0.1:53']
 server_names      = ['mullvad-doh']
 max_clients       = 250
@@ -602,46 +561,151 @@ log_level         = 0
   minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
   refresh_delay = 72</code></pre>
 
+<h2>Verifying It Works</h2>
+<p>Once <code>gnet</code> is running, open a browser and go to <a href="https://browserleaks.com/dns">browserleaks.com/dns</a> or <a href="https://ipleak.net">ipleak.net</a>. You should see:</p>
+<ul>
+    <li><strong>IP address:</strong> a Mullvad server, not your real IP</li>
+    <li><strong>DNS servers:</strong> Mullvad's upstream resolvers (typically Netherlands/UK)</li>
+    <li><strong>IPv6:</strong> nothing — IPv6 should be completely absent</li>
+    <li><strong>WebRTC:</strong> disable in Brave at <code>brave://flags</code> → search WebRTC → disable</li>
+</ul>
+<p>From the terminal:</p>
+<pre><code class="language-bash">curl ifconfig.me          # should show Mullvad IP
+dig +short google.com     # should resolve (proves DNS works)</code></pre>
+
+<h2>What Your ISP Can See</h2>
+<p>With this setup active, your ISP (T-Mobile or otherwise) sees:</p>
+<ul>
+    <li>That you're sending encrypted data to your phone</li>
+    <li>Nothing else</li>
+</ul>
+<p>They cannot see destination websites, DNS queries, content, or metadata. Mullvad can see your destinations but has a strict no-logging policy.</p>
+
 <h2>Known Limitations</h2>
 
-<h3>UDP traffic not tunneled</h3>
-<p>
-Only TCP is intercepted by redsocks/iptables. Any app using raw UDP (games,
-some video calls, QUIC-based HTTP/3) will bypass the tunnel. This is a
-fundamental limitation of SOCKS5 over TCP.
-</p>
+<h3>UDP traffic bypasses the tunnel</h3>
+<p>redsocks and iptables only handle TCP. Applications that use raw UDP — some games, video calls, and HTTP/3 (QUIC) — will bypass the tunnel entirely. This is a fundamental limitation of SOCKS5 proxying.</p>
 
-<h3>NetworkManager may overwrite resolv.conf</h3>
-<p>
-On interface reconnect, NetworkManager can restore <code>/etc/resolv.conf</code> to the
-phone gateway, breaking dnscrypt DNS routing. <code>gnet</code> backs up and overwrites
-resolv.conf each run. If this becomes persistent, configure NetworkManager
-to not manage DNS:
-</p>
+<h3>NetworkManager may reset DNS on reconnect</h3>
+<p>If your network interface drops and reconnects, NetworkManager may overwrite <code>/etc/resolv.conf</code> back to the phone gateway, bypassing dnscrypt-proxy. To prevent this permanently:</p>
 <pre><code class="language-ini"># /etc/NetworkManager/conf.d/no-dns.conf
 [main]
 dns=none</code></pre>
 
-<h3>gstatus masked field shows false negative</h3>
+<h3>gstatus requires sudo mid-run</h3>
+<p>The iptables check in <code>gstatus</code> needs elevated privileges. To allow it without a password prompt, add this via <code>sudo visudo</code>:</p>
+<pre><code class="language-bash">yopi ALL=(ALL) NOPASSWD: /usr/bin/iptables -t nat -L OUTPUT -n</code></pre>
+
+<h3>Phone must stay connected</h3>
+<p>The tunnel depends entirely on the SSH connection to your phone. If the phone locks, USB disconnects, or Mullvad drops, the tunnel dies. Run <code>gdown</code> then <code>gnet</code> to re-establish.</p>
+
+<h2>Adapting to Any VPN</h2>
 <p>
-When redsocks is active, all traffic including the <code>curl --interface</code> check
-is redirected through the tunnel. Both the tunnel IP and real IP checks
-return the same Mullvad IP, so <code>masked</code> shows <code>no</code> even though traffic is
-correctly tunneled. This is a display bug, not a real leak.
+The script as written assumes Mullvad on your phone, but the tunnel itself —
+SSH, redsocks, iptables — works identically regardless of what VPN your phone
+is running. The only Mullvad-specific part is the DNS server name in dnscrypt-proxy.
 </p>
 
-<h2>The script itself</h2>
+<h3>Swapping the DNS provider</h3>
+<p>Change this line in <code>_dnscrypt_config</code>:</p>
+<pre><code class="language-bash">server_names = ['mullvad-doh']</code></pre>
 
+<table>
+    <thead><tr><th>provider</th><th>server name</th><th>notes</th></tr></thead>
+    <tbody>
+        <tr><td>Mullvad</td><td><code>mullvad-doh</code></td><td>default in this script</td></tr>
+        <tr><td>Cloudflare</td><td><code>cloudflare</code></td><td>fast, US-based, no-log policy</td></tr>
+        <tr><td>Quad9</td><td><code>quad9-doh-ip4-nofilter-ecs-pri</code></td><td>no-log, malware filtering</td></tr>
+        <tr><td>AdGuard</td><td><code>adguard-dns-doh</code></td><td>blocks ads and trackers at DNS</td></tr>
+        <tr><td>NextDNS</td><td><code>nextdns</code></td><td>configurable filtering</td></tr>
+    </tbody>
+</table>
+<p>To list all available servers:</p>
+<pre><code class="language-bash">sudo dnscrypt-proxy -config /tmp/dnscrypt-proxy.toml -list</code></pre>
 
-<pre><code class="language-bash"># [ Phone Tunnel Config ]
-GNET_USER="u0_a242"
-GNET_PORT="8022"
-GNET_PROXY="1080"
-GNET_REDSOCKS="12345"
-# returns 0 if tunnel is active, 1 otherwise thx claude
+<h3>Using no VPN (just routing through carrier)</h3>
+<p>Skip Mullvad entirely. Your traffic exits through your carrier. Switch DNS to a public resolver:</p>
+<pre><code class="language-bash">server_names = ['cloudflare']</code></pre>
+
+<h3>Using a self-hosted VPS instead of a phone</h3>
+<p>Change the config variables to point at your server and update the <code>ssh</code> line in <code>gnet</code> to target your server IP. Everything else stays the same.</p>
+<pre><code class="language-bash">GNET_USER="youruser"
+GNET_PORT="22"
+GNET_PROXY="1080"</code></pre>
+
+<h3>Using Shadowsocks instead of SSH</h3>
+<p>Replace the SSH tunnel section in <code>gnet</code> with <code>ss-local</code>, and update <code>gdown</code> to kill it. redsocks and iptables stay identical — they only care that something speaks SOCKS5 on <code>GNET_PROXY</code>.</p>
+<pre><code class="language-bash">ss-local -s YOUR_SERVER_IP -p YOUR_SERVER_PORT \
+         -k YOUR_PASSWORD -m aes-256-gcm \
+         -l ${GNET_PROXY} -f /tmp/ss-local.pid</code></pre>
+
+<blockquote>
+The key insight: redsocks and iptables only care that something is listening on
+<code>GNET_PROXY</code> that speaks SOCKS5. SSH tunnel, Shadowsocks, a local proxy service —
+any of them drop in without touching the rest of the script.
+</blockquote>
+
+<h2>The Script</h2>
+<p>Add everything below to your <code>~/.bashrc</code>. The only values you need to change are the four variables at the very top.</p>
+
+<style>
+.script-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #21252b;
+    border: 1px solid #3e4452;
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.8rem;
+    color: #98c379;
+    cursor: pointer;
+    margin-bottom: 0.5em;
+    user-select: none;
+    transition: background 0.15s;
+}
+.script-toggle:hover { background: #2c313a; }
+.script-toggle .arrow { transition: transform 0.2s; display: inline-block; }
+.script-toggle.collapsed .arrow { transform: rotate(-90deg); }
+#script-block.collapsed {
+    max-height: 14.5em;
+    overflow: hidden;
+    position: relative;
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+}
+</style>
+
+<button class="script-toggle collapsed" id="script-btn" onclick="
+    var block = document.getElementById('script-block');
+    var btn   = document.getElementById('script-btn');
+    var label = document.getElementById('script-label');
+    if (block.classList.contains('collapsed')) {
+        block.classList.remove('collapsed');
+        btn.classList.remove('collapsed');
+        label.textContent = 'collapse script';
+    } else {
+        block.classList.add('collapsed');
+        btn.classList.add('collapsed');
+        label.textContent = 'expand script';
+    }
+">
+    <span class="arrow">▾</span>
+    <span id="script-label">expand script</span>
+</button>
+
+<div id="script-block" class="collapsed">
+<pre><code class="language-bash"># ─── Phone Tunnel Config ────────────────────────────────────────────────────
+GNET_USER="u0_a242"   # Termux username (run `whoami` in Termux to find yours)
+GNET_PORT="8022"      # Termux SSH port
+GNET_PROXY="1080"     # Local SOCKS5 proxy port
+GNET_REDSOCKS="12345" # Redsocks local redirect port
+
+# Helper: returns 0 if tunnel is active, 1 otherwise
 _tunnel_active() { ss -tuln | grep -q ":${GNET_PROXY}"; }
 
-# redsocks config in temp file
+# Write redsocks config to a temp file
 _redsocks_config() {
     cat &lt;&lt;EOF &gt; /tmp/redsocks.conf
 base {
@@ -661,7 +725,7 @@ redsocks {
 EOF
 }
 
-# dnscrypt-proxy config in temp  — uses Mullvad DoH (HTTPS/TCP, goes through tunnel)
+# Write dnscrypt-proxy config — uses Mullvad DoH (HTTPS/TCP, goes through tunnel)
 _dnscrypt_config() {
     cat &lt;&lt;EOF &gt; /tmp/dnscrypt-proxy.toml
 listen_addresses  = ['127.0.0.1:53']
@@ -684,11 +748,9 @@ log_level         = 0
 EOF
 }
 
-# iptables rules to redirect all TCP in redsocks
+# Add iptables rules to redirect all TCP through redsocks
 _iptables_up() {
     sudo iptables -t nat -N REDSOCKS 2&gt;/dev/null
-
-    # locals - these should never go through the proxy
     sudo iptables -t nat -A REDSOCKS -d 0.0.0.0/8      -j RETURN
     sudo iptables -t nat -A REDSOCKS -d 10.0.0.0/8     -j RETURN
     sudo iptables -t nat -A REDSOCKS -d 127.0.0.0/8    -j RETURN
@@ -697,8 +759,6 @@ _iptables_up() {
     sudo iptables -t nat -A REDSOCKS -d 192.168.0.0/16 -j RETURN
     sudo iptables -t nat -A REDSOCKS -d 224.0.0.0/4    -j RETURN
     sudo iptables -t nat -A REDSOCKS -d 240.0.0.0/4    -j RETURN
-
-    # everything else to redsocks
     sudo iptables -t nat -A REDSOCKS -p tcp -j REDIRECT --to-ports "${GNET_REDSOCKS}"
     sudo iptables -t nat -A OUTPUT   -p tcp -j REDSOCKS
 }
@@ -713,66 +773,53 @@ _iptables_down() {
 function gnet() {
     if _tunnel_active; then
         echo "tunnel already active on port ${GNET_PROXY}"
-        return 0
-    fi
+    else
+        local IFACE PHONE_IP
+        read -r _ _ PHONE_IP _ IFACE _ &lt; &lt;(ip route show default | head -n1)
 
-    local IFACE PHONE_IP
+        if [[ -z "$IFACE" ]]; then
+            echo "error: no internet connection found -- is USB tethering on?"
+            return 1
+        fi
+        if [[ -z "$PHONE_IP" ]]; then
+            echo "error: could not determine phone gateway IP"
+            return 1
+        fi
 
-    # Parse default route in one pass: "default via &lt;ip&gt; dev &lt;iface&gt; ..."
-    read -r _ _ PHONE_IP _ IFACE _ &lt; &lt;(ip route show default | head -n1)
+        echo "iface    $IFACE"
+        echo "phone    $PHONE_IP"
+        echo "checking port ${GNET_PORT}..."
+        if ! timeout 3 bash -c "echo &gt;/dev/tcp/${PHONE_IP}/${GNET_PORT}" 2&gt;/dev/null; then
+            echo "error: port ${GNET_PORT} unreachable on ${PHONE_IP}"
+            echo "       is sshd running in Termux? is a VPN blocking it?"
+            return 1
+        fi
 
-    if [[ -z "$IFACE" ]]; then
-        echo "error: no internet connection found -- is USB tethering on?"
-        return 1
-    fi
+        echo "opening socks5 tunnel on port ${GNET_PROXY}..."
+        ssh -f -N -D "${GNET_PROXY}" -p "${GNET_PORT}" \
+            -c aes128-gcm@openssh.com \
+            -o Compression=no \
+            -o IPQoS=throughput \
+            -o ConnectTimeout=5 \
+            "${GNET_USER}@${PHONE_IP}" || {
+            echo "error: ssh failed to start tunnel"
+            return 1
+        }
 
-    if [[ -z "$PHONE_IP" ]]; then
-        echo "error: could not determine phone gateway IP"
-        return 1
-    fi
-
-    echo "iface    $IFACE"
-    echo "phone    $PHONE_IP"
-
-    # Pre-check: verify port is reachable before attempting SSH
-    echo "checking port ${GNET_PORT}..."
-    if ! timeout 3 bash -c "echo &gt;/dev/tcp/${PHONE_IP}/${GNET_PORT}" 2&gt;/dev/null; then
-        echo "error: port ${GNET_PORT} unreachable on ${PHONE_IP}"
-        echo "       is sshd running in Termux? is a VPN blocking it?"
-        return 1
-    fi
-
-    echo "opening socks5 tunnel on port ${GNET_PROXY}..."
-
-    # -f: fork to background  -N: no remote command
-    # cipher/compression tuned for USB throughput
-    ssh -f -N -D "${GNET_PROXY}" -p "${GNET_PORT}" \
-        -c <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="debfbbadefece6f3b9bdb39eb1aebbb0adadb6f0bdb1b3">[email&#160;protected]</a> \
-        -o Compression=no \
-        -o IPQoS=throughput \
-        -o ConnectTimeout=5 \
-        "${GNET_USER}@${PHONE_IP}" || {
-        echo "error: ssh failed to start tunnel"
-        return 1
-    }
-
-    sleep 1
-    if ! _tunnel_active; then
-        echo "error: tunnel did not open on port ${GNET_PROXY}"
-        return 1
+        sleep 1
+        if ! _tunnel_active; then
+            echo "error: tunnel did not open on port ${GNET_PROXY}"
+            return 1
+        fi
     fi
 
     echo "starting redsocks..."
     _redsocks_config
-    sudo redsocks -c /tmp/redsocks.conf || {
-        echo "error: redsocks failed to start"
-        return 1
-    }
+    sudo redsocks -c /tmp/redsocks.conf || { echo "error: redsocks failed to start"; return 1; }
 
     echo "applying iptables rules..."
     _iptables_up
 
-    # Start dnscrypt-proxy — DoH uses TCP/443
     echo "starting dnscrypt-proxy..."
     _dnscrypt_config
     sudo dnscrypt-proxy -config /tmp/dnscrypt-proxy.toml \
@@ -787,31 +834,25 @@ function gnet() {
     sudo cp /etc/resolv.conf /tmp/resolv.conf.bak
     echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf &gt; /dev/null
 
-    # Disable IPv6 to prevent leaks outside the tunnel
     echo "disabling ipv6..."
     sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1     &gt; /dev/null
     sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1 &gt; /dev/null
 
-    echo "system-wide tunnel active -- DNS encrypted via Mullvad DoH"
+    echo "system-wide tunnel active -- DNS encrypted via DoH"
 }
 
 function gdown() {
     echo "tearing down..."
-
-    # Remove iptables rules first so traffic stops going to redsocks
     _iptables_down
     echo "iptables rules removed"
 
-    # Stop redsocks
     if pgrep -x redsocks &gt; /dev/null; then
         sudo pkill redsocks &amp;&amp; echo "redsocks stopped"
     fi
 
-    # Kill SSH tunnel
     local TUNNEL_PID
     TUNNEL_PID=$(ss -lptn "sport = :${GNET_PROXY}" \
         | awk -F'pid=' 'NR&gt;1 { split($2, a, ","); print a[1]; exit }')
-
     if [[ -n "$TUNNEL_PID" ]]; then
         kill "$TUNNEL_PID" \
             &amp;&amp; echo "tunnel stopped (pid $TUNNEL_PID)" \
@@ -820,8 +861,6 @@ function gdown() {
         echo "no active tunnel on port ${GNET_PROXY}"
     fi
 
-    # stop dnscrypt-proxy
-    # restore resolv.conf
     if pgrep -x dnscrypt-proxy &gt; /dev/null; then
         sudo pkill dnscrypt-proxy &amp;&amp; echo "dnscrypt-proxy stopped"
     fi
@@ -831,7 +870,6 @@ function gdown() {
         echo "dns restored"
     fi
 
-    # re-enable ipv6
     sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0     &gt; /dev/null
     sudo sysctl -w net.ipv6.conf.default.disable_ipv6=0 &gt; /dev/null
     echo "ipv6 restored"
@@ -842,10 +880,8 @@ function gdown() {
 }
 
 function gstatus() {
-    local IFACE PHONE_IP TUNNEL_PID PROXY_IP REAL_IP DNS_SERVER DNS_LEAK
-    local REDSOCKS_ACTIVE=false
+    local IFACE PHONE_IP TUNNEL_PID PROXY_IP REAL_IP DNS_LEAK
 
-    # Parse route info
     IFACE=$(ip route show default | awk 'NR==1 {print $5}')
     PHONE_IP=$(ip route show default | awk 'NR==1 {print $3}')
 
@@ -863,7 +899,6 @@ function gstatus() {
 
     echo "[ redsocks ]"
     if pgrep -x redsocks &gt; /dev/null; then
-        REDSOCKS_ACTIVE=true
         echo "  status   active"
         echo "  port     ${GNET_REDSOCKS}"
         if sudo iptables -t nat -L OUTPUT -n | grep -q REDSOCKS; then
@@ -878,13 +913,9 @@ function gstatus() {
     echo "[ ip ]"
     PROXY_IP=$(curl -s --max-time 5 --socks5-hostname "127.0.0.1:${GNET_PROXY}" ifconfig.me 2&gt;/dev/null)
     echo "  tunnel   ${PROXY_IP:-unavailable}"
-
-    if [[ "$REDSOCKS_ACTIVE" == true ]]; then
-        # When redsocks is active, iptables redirects ALL outbound TCP through the tunnel —
-        # including curl --interface. REAL_IP would just return the tunnel IP, making the
-        # comparison useless and the curl a wasted 5s timeout. Use iptables chain state instead.
-        echo "  real     (redirected -- redsocks active)"
+    if pgrep -x redsocks &gt; /dev/null; then
         if sudo iptables -t nat -L OUTPUT -n 2&gt;/dev/null | grep -q REDSOCKS; then
+            echo "  real     (redirected -- redsocks active)"
             echo "  masked   yes (redsocks + iptables confirmed)"
         else
             echo "  masked   no -- redsocks running but iptables chain missing"
@@ -903,25 +934,25 @@ function gstatus() {
 
     echo "[ dns ]"
     if pgrep -x dnscrypt-proxy &gt; /dev/null; then
-        echo "  dnscrypt active"
         DNS_LEAK=$(dig +short +time=3 google.com @127.0.0.1 2&gt;/dev/null | head -1)
-        echo "  resolves via  127.0.0.1 (dnscrypt → Mullvad DoH → tunnel)"
+        echo "  dnscrypt active"
+        echo "  resolves via  127.0.0.1 (dnscrypt → DoH → tunnel)"
         echo "  dig           ${DNS_LEAK:-unavailable}"
         if [[ -n "$DNS_LEAK" ]]; then
-            echo "  leak          none detected"
+            echo "  leak          none -- dnscrypt resolving correctly"
         else
-            echo "  leak          unknown (dig returned nothing)"
+            echo "  leak          unknown -- dig failed, check dnscrypt"
         fi
     else
         echo "  dnscrypt inactive -- DNS may be leaking"
-        DNS_SERVER=$(awk '/^nameserver/{print $2; exit}' /etc/resolv.conf)
-        echo "  server   ${DNS_SERVER:-unknown}"
+        echo "  server   $(awk '/^nameserver/{print $2; exit}' /etc/resolv.conf)"
     fi
 
     echo "[ system ]"
     echo "  iface    ${IFACE:-unknown}"
     echo "  ttl      $(sysctl -n net.ipv4.ip_default_ttl)"
 }</code></pre>
+</div>
 
 </body>
 </html>
