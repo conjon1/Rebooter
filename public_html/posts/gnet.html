@@ -355,7 +355,7 @@
 })();
 ">
 
-<h1>Tunneling All System Traffic Through Your Phone with SSH, redsocks, and Mullvad</h1>
+<h1>Using Your Phone as a VPN for Your Computer</h1>
 
 <h2>What Is This?</h2>
 <p>
@@ -693,6 +693,22 @@ any of them drop in without touching the rest of the script.
 ">
     <span class="arrow">▾</span>
     <span id="script-label">expand script</span>
+</button>
+<button class="script-toggle" id="copy-btn" onclick="
+    var code = document.querySelector('#script-block pre code');
+    var text = code ? code.innerText : '';
+    navigator.clipboard.writeText(text).then(function() {
+        var label = document.getElementById('copy-label');
+        label.textContent = 'copied!';
+        document.getElementById('copy-btn').style.color = '#61afef';
+        setTimeout(function() {
+            label.textContent = 'copy script';
+            document.getElementById('copy-btn').style.color = '';
+        }, 2000);
+    });
+">
+    <span>⎘</span>
+    <span id="copy-label">copy script</span>
 </button>
 
 <div id="script-block" class="collapsed">
