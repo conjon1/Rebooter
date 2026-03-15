@@ -1,5 +1,14 @@
 [
   {
+    "id": "gnet",
+    "title": "Tunneling All System Traffic Through Your Phone with SSH, redsocks, and Mullvad",
+    "date": "March 13, 2026",
+    "excerpt": "Routes all system TCP traffic through a SOCKS5 tunnel over USB tethering to an Android phone running Mullvad VPN. DNS encrypted via dnscrypt-proxy over DoH. IPv6 disabled at runtime to prevent leaks.",
+    "url": "posts/gnet.html",
+    "author": "Connal McInnis",
+    "authorId": "connalmcinnis"
+  },
+  {
     "id": "TmobileSpoof",
     "title": "T-mobile TTL spoofing",
     "date": "January 6, 2026",

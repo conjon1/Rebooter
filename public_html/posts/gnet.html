@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tunneling All System Traffic Through Your Phone with SSH, redsocks, and Mullvad</title>
+    <meta name="date"    content="March 13, 2026">
+    <meta name="excerpt" content="Routes all system TCP traffic through a SOCKS5 tunnel over USB tethering to an Android phone running Mullvad VPN. DNS encrypted via dnscrypt-proxy over DoH. IPv6 disabled at runtime to prevent leaks.">
+    <meta name="author"  content="Connal McInnis">
+
+    <meta name="tags"    content="bash, hacking, networking, programming, tmobile">
+
+
+</head>
+<body>
+
+<!-- ── ALL STYLES IN BODY so the SPA's innerHTML injection picks them up ── -->
+<style>
+        /* body selector is ignored inside SPA — these rules scope to the injected content naturally */
+        body, #dynamic-content {
+            line-height: 1.6;
+            font-size: 1.1rem;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            color: #abb2bf;
+        }
+
+        h1, h2, h3, h4, h5 { line-height: 1.2; margin-top: 1.5em; font-family: 'Fira Code', monospace; }
+        h1 { color: #61afef; font-size: 2em; }
+        h2 { color: #c678dd; font-size: 1.5em; border-bottom: 1px solid #3e4452; padding-bottom: 5px; }
+        h3 { color: #98c379; font-size: 1.25em; }
+        h4 { color: #d19a66; font-size: 1.1em; }
+
+        code {
+            background-color: #282c34;
+            color: #e06c75;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1em;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #3e4452;
+            margin: 1em 0;
+            max-width: 100%;        /* never overflow the SPA container */
+            box-sizing: border-box;
+            white-space: pre;
+            word-wrap: normal;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: 0.85em;      /* slightly smaller so long lines stay on screen */
+            white-space: pre;
+        }
+        strong { font-weight: bold; color: #d19a66; }
+        em     { color: #98c379; }
+
+        blockquote {
+            border-left: 4px solid #61afef;
+            padding: 10px 10px 10px 20px;
+            margin: 1.5em 0;
+            font-style: italic;
+            color: #5c6370;
+            background: rgba(40, 44, 52, 0.5);
+            border-radius: 0 4px 4px 0;
+        }
+
+        ul, ol {
+            padding-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        li { margin-bottom: 0.4em; }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+            background-color: #282c34;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #3e4452;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 1px solid #3e4452;
+            border-right: 1px solid #3e4452;
+        }
+        th {
+            background-color: #21252b;
+            color: #61afef;
+            font-weight: 600;
+            font-family: 'Fira Code', monospace;
+        }
+        tr:last-child td { border-bottom: none; }
+        td:last-child, th:last-child { border-right: none; }
+
+        .path-block {
+            background-color: #282c34;
+            border: 1px solid #3e4452;
+            border-radius: 6px;
+            padding: 0.75em 1em;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+            color: #abb2bf;
+            margin: 1em 0;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .dep-block {
+            background: rgba(40, 44, 52, 0.4);
+            border-left: 3px solid #3e4452;
+            padding: 0.6em 1em;
+            margin: 0.75em 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .dep-block strong { color: #61afef; }
+        .dep-block a { color: #98c379; }
+
+        /* ── Side panel columns ── */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            width: 130px;
+            height: 100vh;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            opacity: 0.35;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.7rem;
+        }
+        .side-panel.left  { left: 0;  align-items: flex-end;  padding-right: 8px; }
+        .side-panel.right { right: 0; align-items: flex-start; padding-left: 8px; }
+
+        @media (max-width: 1100px) { .side-panel { display: none; } }
+
+        .side-panel span {
+            display: block;
+            white-space: nowrap;
+            animation: fall linear infinite;
+            opacity: 0;
+        }
+        @keyframes fall {
+            0%   { transform: translateY(-60px); opacity: 0; }
+            5%   { opacity: 1; }
+            90%  { opacity: 0.6; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        /* ── Terminal titlebar on pre blocks ── */
+        pre {
+            position: relative;
+            padding-top: 2.4em !important;
+        }
+        pre::before {
+            content: '[root@arch ~]$';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            padding: 0.35em 0.8em;
+            background: #21252b;
+            border-bottom: 1px solid #3e4452;
+            border-radius: 8px 8px 0 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: #98c379;
+        }
+
+        /* ── Blinking cursor after h1 ── */
+        h1::after {
+            content: '▋';
+            display: inline-block;
+            color: #61afef;
+            animation: blink-cur 0.85s step-end infinite;
+            margin-left: 6px;
+            font-size: 0.85em;
+            vertical-align: middle;
+        }
+        @keyframes blink-cur { 50% { opacity: 0; } }
+
+        /* ── Animated path-blocks ── */
+        .path-block {
+            position: relative;
+            border-left: 3px solid #61afef !important;
+            animation: pulse-border 3s ease-in-out infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-left-color: #61afef; box-shadow: -2px 0 8px rgba(97,175,239,0.15); }
+            50%       { border-left-color: #98c379; box-shadow: -2px 0 12px rgba(152,195,121,0.3); }
+        }
+        .path-block::after {
+            content: '▋';
+            display: inline;
+            color: #98c379;
+            animation: blink-cur 1s step-end infinite;
+        }
+
+        /* ── Scan-line overlay on code blocks ── */
+        pre::after {
+            content: '';
+            position: absolute;
+            top: 2.4em; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 3px,
+                rgba(0,0,0,0.06) 3px,
+                rgba(0,0,0,0.06) 4px
+            );
+            pointer-events: none;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* ── Glowing h2 section dividers ── */
+        h2 {
+            text-shadow: 0 0 12px rgba(198,120,221,0.25);
+        }
+
+        /* ── Status badge ── */
+        #verified-badge {
+            display: inline-block;
+            background: rgba(152,195,121,0.12);
+            border: 1px solid #98c379;
+            border-radius: 4px;
+            padding: 2px 10px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: #98c379;
+            margin-left: 10px;
+            vertical-align: middle;
+            animation: badge-pulse 2.5s ease-in-out infinite;
+        }
+        @keyframes badge-pulse {
+            0%, 100% { box-shadow: 0 0 4px rgba(152,195,121,0.2);  }
+            50%       { box-shadow: 0 0 12px rgba(152,195,121,0.5); }
+        }
+
+        /* ── hljs atom-one-dark fallback (loaded dynamically below) ── */
+        .hljs { background: transparent !important; }
+</style>
+
+<!-- hljs trigger: <script> tags injected via innerHTML never execute.
+     img onerror fires even via innerHTML — use it to load and run hljs.
+     src is an intentionally invalid data URI so onerror fires without a server hit. -->
+<img src="data:x/x," style="display:none" alt="" onerror="
+  this.remove();
+  var base='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/';
+
+  function highlightAll(){
+    document.querySelectorAll('pre code').forEach(function(el){
+      if(!el.dataset.highlighted) hljs.highlightElement(el);
+    });
+  }
+
+  /* hljs already on page (second SPA visit) — run immediately */
+  if(typeof hljs!=='undefined'){
+    hljs.configure({ ignoreUnescapedHTML: true });
+    highlightAll();
+    return;
+  }
+
+  /* First visit — load hljs, then highlight twice:
+     once right away with auto-detect, again after language packs for full colour */
+  var link=document.createElement('link');
+  link.rel='stylesheet'; link.href=base+'styles/atom-one-dark.min.css';
+  document.head.appendChild(link);
+
+  var main=document.createElement('script');
+  main.src=base+'highlight.min.js';
+  main.onload=function(){
+    hljs.configure({ ignoreUnescapedHTML: true });
+    highlightAll(); /* immediate pass — no waiting on language packs */
+    var langs=['bash','toml','nginx','ini'], n=0;
+    langs.forEach(function(l){
+      var s=document.createElement('script');
+      s.src=base+'languages/'+l+'.min.js';
+      s.onload=function(){
+        if(++n===langs.length){
+          /* reset highlighted flags so hljs re-processes with proper grammar */
+          document.querySelectorAll('pre code[data-highlighted]').forEach(function(el){
+            el.removeAttribute('data-highlighted');
+            el.className=el.className; /* keep language-* class */
+          });
+          highlightAll();
+        }
+      };
+      document.head.appendChild(s);
+    });
+  };
+  document.head.appendChild(main);
+">
+
+<!-- Left side panel: packet / network stream -->
+<div class="side-panel left" aria-hidden="true">
+    <span style="animation-duration:6.1s; animation-delay:0.0s; color:#61afef">tcp:12345→1080</span>
+    <span style="animation-duration:7.4s; animation-delay:0.8s; color:#5c6370">0xdeadbeef</span>
+    <span style="animation-duration:5.8s; animation-delay:1.5s; color:#98c379">SYN ACK</span>
+    <span style="animation-duration:8.2s; animation-delay:2.1s; color:#5c6370">TTL=64</span>
+    <span style="animation-duration:6.7s; animation-delay:0.3s; color:#c678dd">REDIRECT</span>
+    <span style="animation-duration:9.0s; animation-delay:3.2s; color:#61afef">ssh -D 1080</span>
+    <span style="animation-duration:5.5s; animation-delay:1.9s; color:#5c6370">0x0800</span>
+    <span style="animation-duration:7.1s; animation-delay:4.0s; color:#98c379">ESTABLISHED</span>
+    <span style="animation-duration:6.3s; animation-delay:0.6s; color:#5c6370">nat OUTPUT</span>
+    <span style="animation-duration:8.8s; animation-delay:2.7s; color:#61afef">SOCKS5</span>
+    <span style="animation-duration:5.2s; animation-delay:3.8s; color:#5c6370">proto TCP</span>
+    <span style="animation-duration:7.6s; animation-delay:1.1s; color:#c678dd">redsocks</span>
+    <span style="animation-duration:6.9s; animation-delay:4.5s; color:#5c6370">FIN WAIT</span>
+    <span style="animation-duration:8.4s; animation-delay:0.4s; color:#98c379">DoH/443</span>
+    <span style="animation-duration:5.9s; animation-delay:2.3s; color:#5c6370">ff:ff:ff:ff</span>
+    <span style="animation-duration:7.3s; animation-delay:3.5s; color:#61afef">192.168.x.x</span>
+    <span style="animation-duration:6.0s; animation-delay:5.1s; color:#5c6370">PSH URG</span>
+    <span style="animation-duration:9.2s; animation-delay:1.7s; color:#98c379">encrypted</span>
+</div>
+
+<!-- Right side panel: shell / iptables stream -->
+<div class="side-panel right" aria-hidden="true">
+    <span style="animation-duration:7.2s; animation-delay:0.5s; color:#98c379">$ gnet</span>
+    <span style="animation-duration:5.7s; animation-delay:1.3s; color:#5c6370">iptables -t nat</span>
+    <span style="animation-duration:8.6s; animation-delay:2.8s; color:#61afef">dnscrypt-proxy</span>
+    <span style="animation-duration:6.4s; animation-delay:0.2s; color:#5c6370">resolv.conf</span>
+    <span style="animation-duration:7.9s; animation-delay:3.6s; color:#c678dd">mullvad-doh</span>
+    <span style="animation-duration:5.3s; animation-delay:1.8s; color:#5c6370">sysctl ipv6=0</span>
+    <span style="animation-duration:9.1s; animation-delay:4.2s; color:#98c379">tunnel active</span>
+    <span style="animation-duration:6.8s; animation-delay:0.9s; color:#5c6370">pkill redsocks</span>
+    <span style="animation-duration:7.5s; animation-delay:2.4s; color:#61afef">$ gstatus</span>
+    <span style="animation-duration:5.6s; animation-delay:3.9s; color:#5c6370">masked: yes</span>
+    <span style="animation-duration:8.3s; animation-delay:1.2s; color:#98c379">DNS: 127.0.0.1</span>
+    <span style="animation-duration:6.2s; animation-delay:4.7s; color:#5c6370">leak: none</span>
+    <span style="animation-duration:7.8s; animation-delay:0.7s; color:#c678dd">aes128-gcm</span>
+    <span style="animation-duration:5.4s; animation-delay:2.0s; color:#5c6370">port 8022</span>
+    <span style="animation-duration:9.3s; animation-delay:3.3s; color:#61afef">Termux sshd</span>
+    <span style="animation-duration:6.6s; animation-delay:1.6s; color:#5c6370">$ gdown</span>
+    <span style="animation-duration:8.1s; animation-delay:4.9s; color:#98c379">ipv6 restored</span>
+    <span style="animation-duration:7.0s; animation-delay:0.1s; color:#5c6370">no leak ✓</span>
+</div>
+
+<h1>Tunneling All System Traffic Through Your Phone with SSH, redsocks, and Mullvad</h1>
+
+<h2>Overview</h2>
+
+<p>
+Routes all system TCP traffic through a SOCKS5 tunnel over USB tethering (or
+WiFi) to an Android phone running Mullvad VPN. DNS is encrypted via
+dnscrypt-proxy over DoH. IPv6 is disabled at runtime to prevent leaks.
+Provides a fully masked public IP for all outbound connections without a
+native VPN client on the host machine.
+</p>
+
+<p><strong>Traffic path:</strong></p>
+<div class="path-block">computer (TCP) → iptables → redsocks:12345 → SOCKS5:1080 → SSH → phone → Mullvad → internet</div>
+
+<p><strong>DNS path (fully resolved — no leak):</strong></p>
+<div class="path-block">computer → resolv.conf (127.0.0.1) → dnscrypt-proxy:53 → DoH/HTTPS:443 → redsocks → tunnel → Mullvad DNS</div>
+
+<h2>Verified Status <span id="verified-badge">✓ CONFIRMED CLEAN</span></h2>
+
+<p>Confirmed clean via browserleaks.com/dns and ipleak.net:</p>
+<ul>
+    <li><strong>Public IP:</strong> Mullvad exit node (Miami, Datacamp Limited)</li>
+    <li><strong>DNS servers:</strong> Mullvad upstream resolvers (Netherlands + UK, M247 Europe SRL)</li>
+    <li><strong>IPv6:</strong> disabled — no leak</li>
+    <li><strong>WebRTC:</strong> disabled in Brave via <code>brave://flags</code></li>
+    <li><strong>T-Mobile visibility:</strong> encrypted SSH blob only — no destinations, no content, no DNS</li>
+</ul>
+
+<h2>Commands</h2>
+
+<table>
+    <thead>
+        <tr><th>command</th><th>description</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>gnet</code></td><td>open SSH tunnel, start redsocks, apply iptables, start dnscrypt, disable IPv6</td></tr>
+        <tr><td><code>gdown</code></td><td>tear down in reverse: iptables, redsocks, ssh, dnscrypt, restore DNS + IPv6</td></tr>
+        <tr><td><code>gstatus</code></td><td>show full state: tunnel, redsocks, ip, dns, system</td></tr>
+    </tbody>
+</table>
+
+<h3>Startup order (gnet)</h3>
+<p>Order is strict — each step depends on the previous one being live:</p>
+<ol>
+    <li>SSH tunnel opens on port 1080</li>
+    <li>redsocks starts, listens on 12345, forwards to 1080</li>
+    <li>iptables redirects all outbound TCP to redsocks</li>
+    <li>dnscrypt-proxy starts, listens on 127.0.0.1:53</li>
+    <li>resolv.conf set to 127.0.0.1</li>
+    <li>IPv6 disabled system-wide</li>
+</ol>
+
+<h3>Teardown order (gdown)</h3>
+<p>Reverse of startup — iptables must come down first or network dies:</p>
+<ol>
+    <li>iptables rules flushed (restores network reachability immediately)</li>
+    <li>redsocks stopped</li>
+    <li>SSH tunnel killed</li>
+    <li>dnscrypt-proxy stopped</li>
+    <li>resolv.conf restored from backup</li>
+    <li>IPv6 re-enabled</li>
+</ol>
+
+<h2>Host Dependencies</h2>
+
+<div class="dep-block">
+    <h4>openssh</h4>
+    <ul>
+        <li><strong>package:</strong> <code>openssh</code></li>
+        <li><strong>purpose:</strong> creates the SOCKS5 tunnel via <code>ssh -D</code></li>
+        <li><strong>flags:</strong> <code>-f -N -D</code> (background, no command, dynamic forwarding)</li>
+        <li><strong>cipher:</strong> <code><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3554504604070d18525658755a45505b46465d1b565a58">[email&#160;protected]</a></code> (hardware-accelerated via AES-NI)</li>
+        <li><strong>options:</strong> <code>Compression=no</code>, <code>IPQoS=throughput</code>, <code>ConnectTimeout=5</code></li>
+        <li><strong>docs:</strong> <a href="https://www.openssh.com/manual.html">https://www.openssh.com/manual.html</a></li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>redsocks</h4>
+    <ul>
+        <li><strong>package:</strong> <code>redsocks</code></li>
+        <li><strong>purpose:</strong> intercepts system-wide TCP and redirects through SOCKS5 proxy</li>
+        <li><strong>config:</strong> <code>/tmp/redsocks.conf</code> (generated at runtime by <code>gnet</code>)</li>
+        <li><strong>port:</strong> 12345 (local redirect listener)</li>
+        <li><strong>docs:</strong> <a href="https://github.com/darkk/redsocks">https://github.com/darkk/redsocks</a></li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>iptables</h4>
+    <ul>
+        <li><strong>package:</strong> <code>iptables</code> (pre-installed)</li>
+        <li><strong>purpose:</strong> intercepts all outbound TCP, sends to redsocks on port 12345</li>
+        <li><strong>chain:</strong> custom <code>REDSOCKS</code> chain in <code>nat</code> table, attached to <code>OUTPUT</code></li>
+        <li><strong>bypassed ranges:</strong> 0/8, 10/8, 127/8, 169.254/16, 172.16/12, 192.168/16, 224/4, 240/4</li>
+        <li><strong>docs:</strong> <a href="https://linux.die.net/man/8/iptables">https://linux.die.net/man/8/iptables</a></li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>dnscrypt-proxy</h4>
+    <ul>
+        <li><strong>package:</strong> <code>dnscrypt-proxy</code></li>
+        <li><strong>purpose:</strong> encrypts DNS queries via DoH, routes them over TCP through the tunnel</li>
+        <li><strong>listens:</strong> <code>127.0.0.1:53</code></li>
+        <li><strong>server:</strong> <code>mullvad-doh</code></li>
+        <li><strong>config:</strong> <code>/tmp/dnscrypt-proxy.toml</code> (generated at runtime by <code>gnet</code>)</li>
+        <li><strong>log:</strong> <code>/tmp/dnscrypt-proxy.log</code></li>
+        <li><strong>pid:</strong> <code>/tmp/dnscrypt-proxy.pid</code></li>
+        <li><strong>docs:</strong> <a href="https://github.com/DNSCrypt/dnscrypt-proxy">https://github.com/DNSCrypt/dnscrypt-proxy</a></li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>bind (dig)</h4>
+    <ul>
+        <li><strong>package:</strong> <code>bind</code></li>
+        <li><strong>purpose:</strong> DNS lookup tool used in <code>gstatus</code> to verify DNS is resolving</li>
+        <li><strong>docs:</strong> <a href="https://bind9.readthedocs.io">https://bind9.readthedocs.io</a></li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>netcat</h4>
+    <ul>
+        <li><strong>package:</strong> <code>netcat</code></li>
+        <li><strong>purpose:</strong> port reachability testing (<code>nc</code>)</li>
+        <li><strong>docs:</strong> <a href="https://netcat.sourceforge.net">https://netcat.sourceforge.net</a></li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>curl</h4>
+    <ul>
+        <li><strong>package:</strong> <code>curl</code> (pre-installed)</li>
+        <li><strong>purpose:</strong> IP detection in <code>gstatus</code> via <code>--socks5-hostname</code></li>
+        <li><strong>docs:</strong> <a href="https://curl.se/docs/manpage.html">https://curl.se/docs/manpage.html</a></li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>iproute2 (ip, ss)</h4>
+    <ul>
+        <li><strong>package:</strong> <code>iproute2</code> (pre-installed)</li>
+        <li><strong>purpose:</strong> <code>ip route</code> for gateway/interface detection, <code>ss</code> for tunnel PID lookup</li>
+        <li><strong>docs:</strong> <a href="https://wiki.linuxfoundation.org/networking/iproute2">https://wiki.linuxfoundation.org/networking/iproute2</a></li>
+    </ul>
+</div>
+
+<h2>Phone Dependencies</h2>
+
+<div class="dep-block">
+    <h4>Termux</h4>
+    <ul>
+        <li><strong>platform:</strong> Android (F-Droid recommended over Play Store)</li>
+        <li><strong>purpose:</strong> provides a Linux environment and sshd on the phone</li>
+        <li><strong>install:</strong> <a href="https://f-droid.org/packages/com.termux/">https://f-droid.org/packages/com.termux/</a></li>
+        <li><strong>note:</strong> you can use the appstore version just no start on boot</li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>Termux:openssh</h4>
+    <ul>
+        <li><strong>package:</strong> <code>openssh</code> (install via <code>pkg install openssh</code> in Termux)</li>
+        <li><strong>purpose:</strong> runs <code>sshd</code> on the phone so the host can tunnel through it</li>
+        <li><strong>default port:</strong> 8022</li>
+        <li><strong>config:</strong> <code>$PREFIX/etc/ssh/sshd_config</code></li>
+        <li><strong>start:</strong> <code>sshd</code> (run manually or on boot via Termux:Boot)</li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>Termux:Boot (optional)</h4>
+    <ul>
+        <li><strong>package:</strong> Termux:Boot (F-Droid)</li>
+        <li><strong>purpose:</strong> auto-starts <code>sshd</code> when the phone boots</li>
+        <li><strong>setup:</strong> place <code>sshd</code> call in <code>$HOME/.termux/boot/</code></li>
+        <li><strong>install:</strong> <a href="https://f-droid.org/packages/com.termux.boot/">https://f-droid.org/packages/com.termux.boot/</a></li>
+    </ul>
+</div>
+
+<div class="dep-block">
+    <h4>Mullvad VPN (optional, user preference)</h4>
+    <ul>
+        <li><strong>platform:</strong> Android (version 2026.2 tested)</li>
+        <li><strong>purpose:</strong> provides the masked public IP and encrypted upstream connection</li>
+        <li><strong>split tunneling:</strong> Termux must be excluded so the SSH tunnel is not disrupted</li>
+        <li><strong>dns:</strong> 100.64.0.1 (internal — reachable from phone only, not over SOCKS5)</li>
+        <li><strong>note:</strong> Android version does not expose a local SOCKS5 proxy (desktop only)</li>
+        <li><strong>install:</strong> <a href="https://mullvad.net/en/download/android">https://mullvad.net/en/download/android</a></li>
+    </ul>
+</div>
+
+<h2>Configuration Reference</h2>
+
+<h3>gnet variables (top of ~/.bashrc)</h3>
+
+<table>
+    <thead>
+        <tr><th>variable</th><th>default</th><th>description</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>GNET_USER</code></td><td>u0_a242</td><td>Termux SSH username</td></tr>
+        <tr><td><code>GNET_PORT</code></td><td>8022</td><td>Termux sshd port</td></tr>
+        <tr><td><code>GNET_PROXY</code></td><td>1080</td><td>local SOCKS5 proxy port</td></tr>
+        <tr><td><code>GNET_REDSOCKS</code></td><td>12345</td><td>redsocks local TCP redirect port</td></tr>
+    </tbody>
+</table>
+
+<h3>redsocks config (generated at <code>/tmp/redsocks.conf</code>)</h3>
+
+<pre><code class="language-nginx">base {
+    log_debug  = off;
+    log_info   = off;
+    log        = "syslog:daemon";
+    daemon     = on;
+    redirector = iptables;
+}
+redsocks {
+    local_ip   = 127.0.0.1;
+    local_port = 12345;
+    ip         = 127.0.0.1;
+    port       = 1080;
+    type       = socks5;
+}</code></pre>
+
+<h3>dnscrypt-proxy config (generated at <code>/tmp/dnscrypt-proxy.toml</code>)</h3>
+
+<pre><code class="language-toml">listen_addresses  = ['127.0.0.1:53']
+server_names      = ['mullvad-doh']
+max_clients       = 250
+ipv4_servers      = true
+ipv6_servers      = false
+dnscrypt_servers  = false
+doh_servers       = true
+require_nolog     = true
+require_nofilter  = true
+log_level         = 0
+
+[sources.public-resolvers]
+  urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md']
+  cache_file = '/tmp/dnscrypt-resolvers.md'
+  minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+  refresh_delay = 72</code></pre>
+
+<h2>Known Limitations</h2>
+
+<h3>UDP traffic not tunneled</h3>
+<p>
+Only TCP is intercepted by redsocks/iptables. Any app using raw UDP (games,
+some video calls, QUIC-based HTTP/3) will bypass the tunnel. This is a
+fundamental limitation of SOCKS5 over TCP.
+</p>
+
+<h3>NetworkManager may overwrite resolv.conf</h3>
+<p>
+On interface reconnect, NetworkManager can restore <code>/etc/resolv.conf</code> to the
+phone gateway, breaking dnscrypt DNS routing. <code>gnet</code> backs up and overwrites
+resolv.conf each run. If this becomes persistent, configure NetworkManager
+to not manage DNS:
+</p>
+<pre><code class="language-ini"># /etc/NetworkManager/conf.d/no-dns.conf
+[main]
+dns=none</code></pre>
+
+<h3>gstatus masked field shows false negative</h3>
+<p>
+When redsocks is active, all traffic including the <code>curl --interface</code> check
+is redirected through the tunnel. Both the tunnel IP and real IP checks
+return the same Mullvad IP, so <code>masked</code> shows <code>no</code> even though traffic is
+correctly tunneled. This is a display bug, not a real leak.
+</p>
+
+<h2>The script itself</h2>
+
+
+<pre><code class="language-bash"># [ Phone Tunnel Config ]
+GNET_USER="u0_a242"
+GNET_PORT="8022"
+GNET_PROXY="1080"
+GNET_REDSOCKS="12345"
+# returns 0 if tunnel is active, 1 otherwise thx claude
+_tunnel_active() { ss -tuln | grep -q ":${GNET_PROXY}"; }
+
+# redsocks config in temp file
+_redsocks_config() {
+    cat &lt;&lt;EOF &gt; /tmp/redsocks.conf
+base {
+    log_debug = off;
+    log_info  = off;
+    log       = "syslog:daemon";
+    daemon    = on;
+    redirector = iptables;
+}
+redsocks {
+    local_ip   = 127.0.0.1;
+    local_port = ${GNET_REDSOCKS};
+    ip         = 127.0.0.1;
+    port       = ${GNET_PROXY};
+    type       = socks5;
+}
+EOF
+}
+
+# dnscrypt-proxy config in temp  — uses Mullvad DoH (HTTPS/TCP, goes through tunnel)
+_dnscrypt_config() {
+    cat &lt;&lt;EOF &gt; /tmp/dnscrypt-proxy.toml
+listen_addresses  = ['127.0.0.1:53']
+server_names      = ['mullvad-doh']
+max_clients       = 250
+ipv4_servers      = true
+ipv6_servers      = false
+dnscrypt_servers  = false
+doh_servers       = true
+require_dnssec    = false
+require_nolog     = true
+require_nofilter  = true
+log_level         = 0
+
+[sources.public-resolvers]
+  urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md']
+  cache_file = '/tmp/dnscrypt-resolvers.md'
+  minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+  refresh_delay = 72
+EOF
+}
+
+# iptables rules to redirect all TCP in redsocks
+_iptables_up() {
+    sudo iptables -t nat -N REDSOCKS 2&gt;/dev/null
+
+    # locals - these should never go through the proxy
+    sudo iptables -t nat -A REDSOCKS -d 0.0.0.0/8      -j RETURN
+    sudo iptables -t nat -A REDSOCKS -d 10.0.0.0/8     -j RETURN
+    sudo iptables -t nat -A REDSOCKS -d 127.0.0.0/8    -j RETURN
+    sudo iptables -t nat -A REDSOCKS -d 169.254.0.0/16 -j RETURN
+    sudo iptables -t nat -A REDSOCKS -d 172.16.0.0/12  -j RETURN
+    sudo iptables -t nat -A REDSOCKS -d 192.168.0.0/16 -j RETURN
+    sudo iptables -t nat -A REDSOCKS -d 224.0.0.0/4    -j RETURN
+    sudo iptables -t nat -A REDSOCKS -d 240.0.0.0/4    -j RETURN
+
+    # everything else to redsocks
+    sudo iptables -t nat -A REDSOCKS -p tcp -j REDIRECT --to-ports "${GNET_REDSOCKS}"
+    sudo iptables -t nat -A OUTPUT   -p tcp -j REDSOCKS
+}
+
+# Remove all iptables rules added by gnet
+_iptables_down() {
+    sudo iptables -t nat -D OUTPUT -p tcp -j REDSOCKS 2&gt;/dev/null
+    sudo iptables -t nat -F REDSOCKS 2&gt;/dev/null
+    sudo iptables -t nat -X REDSOCKS 2&gt;/dev/null
+}
+
+function gnet() {
+    if _tunnel_active; then
+        echo "tunnel already active on port ${GNET_PROXY}"
+        return 0
+    fi
+
+    local IFACE PHONE_IP
+
+    # Parse default route in one pass: "default via &lt;ip&gt; dev &lt;iface&gt; ..."
+    read -r _ _ PHONE_IP _ IFACE _ &lt; &lt;(ip route show default | head -n1)
+
+    if [[ -z "$IFACE" ]]; then
+        echo "error: no internet connection found -- is USB tethering on?"
+        return 1
+    fi
+
+    if [[ -z "$PHONE_IP" ]]; then
+        echo "error: could not determine phone gateway IP"
+        return 1
+    fi
+
+    echo "iface    $IFACE"
+    echo "phone    $PHONE_IP"
+
+    # Pre-check: verify port is reachable before attempting SSH
+    echo "checking port ${GNET_PORT}..."
+    if ! timeout 3 bash -c "echo &gt;/dev/tcp/${PHONE_IP}/${GNET_PORT}" 2&gt;/dev/null; then
+        echo "error: port ${GNET_PORT} unreachable on ${PHONE_IP}"
+        echo "       is sshd running in Termux? is a VPN blocking it?"
+        return 1
+    fi
+
+    echo "opening socks5 tunnel on port ${GNET_PROXY}..."
+
+    # -f: fork to background  -N: no remote command
+    # cipher/compression tuned for USB throughput
+    ssh -f -N -D "${GNET_PROXY}" -p "${GNET_PORT}" \
+        -c <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="debfbbadefece6f3b9bdb39eb1aebbb0adadb6f0bdb1b3">[email&#160;protected]</a> \
+        -o Compression=no \
+        -o IPQoS=throughput \
+        -o ConnectTimeout=5 \
+        "${GNET_USER}@${PHONE_IP}" || {
+        echo "error: ssh failed to start tunnel"
+        return 1
+    }
+
+    sleep 1
+    if ! _tunnel_active; then
+        echo "error: tunnel did not open on port ${GNET_PROXY}"
+        return 1
+    fi
+
+    echo "starting redsocks..."
+    _redsocks_config
+    sudo redsocks -c /tmp/redsocks.conf || {
+        echo "error: redsocks failed to start"
+        return 1
+    }
+
+    echo "applying iptables rules..."
+    _iptables_up
+
+    # Start dnscrypt-proxy — DoH uses TCP/443
+    echo "starting dnscrypt-proxy..."
+    _dnscrypt_config
+    sudo dnscrypt-proxy -config /tmp/dnscrypt-proxy.toml \
+        -pidfile /tmp/dnscrypt-proxy.pid \
+        &gt; /tmp/dnscrypt-proxy.log 2&gt;&amp;1 &amp;
+    sleep 2
+    if ! pgrep -x dnscrypt-proxy &gt; /dev/null; then
+        echo "error: dnscrypt-proxy failed to start (check /tmp/dnscrypt-proxy.log)"
+        return 1
+    fi
+
+    sudo cp /etc/resolv.conf /tmp/resolv.conf.bak
+    echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf &gt; /dev/null
+
+    # Disable IPv6 to prevent leaks outside the tunnel
+    echo "disabling ipv6..."
+    sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1     &gt; /dev/null
+    sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1 &gt; /dev/null
+
+    echo "system-wide tunnel active -- DNS encrypted via Mullvad DoH"
+}
+
+function gdown() {
+    echo "tearing down..."
+
+    # Remove iptables rules first so traffic stops going to redsocks
+    _iptables_down
+    echo "iptables rules removed"
+
+    # Stop redsocks
+    if pgrep -x redsocks &gt; /dev/null; then
+        sudo pkill redsocks &amp;&amp; echo "redsocks stopped"
+    fi
+
+    # Kill SSH tunnel
+    local TUNNEL_PID
+    TUNNEL_PID=$(ss -lptn "sport = :${GNET_PROXY}" \
+        | awk -F'pid=' 'NR&gt;1 { split($2, a, ","); print a[1]; exit }')
+
+    if [[ -n "$TUNNEL_PID" ]]; then
+        kill "$TUNNEL_PID" \
+            &amp;&amp; echo "tunnel stopped (pid $TUNNEL_PID)" \
+            || echo "error: could not kill tunnel pid $TUNNEL_PID"
+    else
+        echo "no active tunnel on port ${GNET_PROXY}"
+    fi
+
+    # stop dnscrypt-proxy
+    # restore resolv.conf
+    if pgrep -x dnscrypt-proxy &gt; /dev/null; then
+        sudo pkill dnscrypt-proxy &amp;&amp; echo "dnscrypt-proxy stopped"
+    fi
+    if [[ -f /tmp/resolv.conf.bak ]]; then
+        sudo cp /tmp/resolv.conf.bak /etc/resolv.conf
+        sudo rm /tmp/resolv.conf.bak
+        echo "dns restored"
+    fi
+
+    # re-enable ipv6
+    sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0     &gt; /dev/null
+    sudo sysctl -w net.ipv6.conf.default.disable_ipv6=0 &gt; /dev/null
+    echo "ipv6 restored"
+
+    if pgrep -x "brave" &gt; /dev/null; then
+        pkill brave &amp;&amp; echo "brave closed"
+    fi
+}
+
+function gstatus() {
+    local IFACE PHONE_IP TUNNEL_PID PROXY_IP REAL_IP DNS_SERVER DNS_LEAK
+    local REDSOCKS_ACTIVE=false
+
+    # Parse route info
+    IFACE=$(ip route show default | awk 'NR==1 {print $5}')
+    PHONE_IP=$(ip route show default | awk 'NR==1 {print $3}')
+
+    echo "[ ssh tunnel ]"
+    if _tunnel_active; then
+        TUNNEL_PID=$(ss -lptn "sport = :${GNET_PROXY}" \
+            | awk -F'pid=' 'NR&gt;1 { split($2, a, ","); print a[1]; exit }')
+        echo "  status   active"
+        echo "  port     ${GNET_PROXY}"
+        echo "  pid      ${TUNNEL_PID:-unknown}"
+        echo "  phone    ${PHONE_IP:-unknown}  (via ${IFACE:-unknown})"
+    else
+        echo "  status   inactive"
+    fi
+
+    echo "[ redsocks ]"
+    if pgrep -x redsocks &gt; /dev/null; then
+        REDSOCKS_ACTIVE=true
+        echo "  status   active"
+        echo "  port     ${GNET_REDSOCKS}"
+        if sudo iptables -t nat -L OUTPUT -n | grep -q REDSOCKS; then
+            echo "  iptables routing -&gt; active"
+        else
+            echo "  iptables routing -&gt; missing (run gnet to fix)"
+        fi
+    else
+        echo "  status   inactive"
+    fi
+
+    echo "[ ip ]"
+    PROXY_IP=$(curl -s --max-time 5 --socks5-hostname "127.0.0.1:${GNET_PROXY}" ifconfig.me 2&gt;/dev/null)
+    echo "  tunnel   ${PROXY_IP:-unavailable}"
+
+    if [[ "$REDSOCKS_ACTIVE" == true ]]; then
+        # When redsocks is active, iptables redirects ALL outbound TCP through the tunnel —
+        # including curl --interface. REAL_IP would just return the tunnel IP, making the
+        # comparison useless and the curl a wasted 5s timeout. Use iptables chain state instead.
+        echo "  real     (redirected -- redsocks active)"
+        if sudo iptables -t nat -L OUTPUT -n 2&gt;/dev/null | grep -q REDSOCKS; then
+            echo "  masked   yes (redsocks + iptables confirmed)"
+        else
+            echo "  masked   no -- redsocks running but iptables chain missing"
+        fi
+    else
+        REAL_IP=$(curl -s --max-time 5 --interface "${IFACE}" ifconfig.me 2&gt;/dev/null)
+        echo "  real     ${REAL_IP:-unavailable}"
+        if [[ -n "$PROXY_IP" &amp;&amp; -n "$REAL_IP" &amp;&amp; "$PROXY_IP" != "$REAL_IP" ]]; then
+            echo "  masked   yes"
+        elif [[ -z "$PROXY_IP" ]]; then
+            echo "  masked   unknown (tunnel unreachable)"
+        else
+            echo "  masked   no -- traffic may not be routing through tunnel"
+        fi
+    fi
+
+    echo "[ dns ]"
+    if pgrep -x dnscrypt-proxy &gt; /dev/null; then
+        echo "  dnscrypt active"
+        DNS_LEAK=$(dig +short +time=3 google.com @127.0.0.1 2&gt;/dev/null | head -1)
+        echo "  resolves via  127.0.0.1 (dnscrypt → Mullvad DoH → tunnel)"
+        echo "  dig           ${DNS_LEAK:-unavailable}"
+        if [[ -n "$DNS_LEAK" ]]; then
+            echo "  leak          none detected"
+        else
+            echo "  leak          unknown (dig returned nothing)"
+        fi
+    else
+        echo "  dnscrypt inactive -- DNS may be leaking"
+        DNS_SERVER=$(awk '/^nameserver/{print $2; exit}' /etc/resolv.conf)
+        echo "  server   ${DNS_SERVER:-unknown}"
+    fi
+
+    echo "[ system ]"
+    echo "  iface    ${IFACE:-unknown}"
+    echo "  ttl      $(sysctl -n net.ipv4.ip_default_ttl)"
+}</code></pre>
+
+</body>
+</html>
