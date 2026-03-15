@@ -125,38 +125,41 @@
         .dep-block strong { color: #61afef; }
         .dep-block a { color: #98c379; }
 
-        /* ── Side panel columns ── */
-        .side-panel {
+
+        /* ── Mobile-first body ── */
+        @media (max-width: 600px) {
+            body { font-size: 0.97rem; padding: 0 10px; }
+            h1 { font-size: 1.4em; }
+            h2 { font-size: 1.2em; }
+            h3 { font-size: 1.05em; }
+            pre { font-size: 0.8em; }
+            table { font-size: 0.85em; }
+            th, td { padding: 7px 8px; }
+            .dep-block { padding: 0.4em 0.7em; }
+            .path-block { font-size: 0.8em; }
+        }
+
+        /* ── Background floating terminal glyphs ── */
+        #bg-canvas {
             position: fixed;
-            top: 0;
-            width: 130px;
-            height: 100vh;
-            overflow: hidden;
+            inset: 0;
             pointer-events: none;
             z-index: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-            opacity: 0.35;
+            overflow: hidden;
+        }
+        .bg-word {
+            position: absolute;
             font-family: 'Fira Code', monospace;
             font-size: 0.7rem;
-        }
-        .side-panel.left  { left: 0;  align-items: flex-end;  padding-right: 8px; }
-        .side-panel.right { right: 0; align-items: flex-start; padding-left: 8px; }
-
-        @media (max-width: 1100px) { .side-panel { display: none; } }
-
-        .side-panel span {
-            display: block;
             white-space: nowrap;
-            animation: fall linear infinite;
             opacity: 0;
+            animation: ghost-fade linear infinite;
         }
-        @keyframes fall {
-            0%   { transform: translateY(-60px); opacity: 0; }
-            5%   { opacity: 1; }
-            90%  { opacity: 0.6; }
-            100% { transform: translateY(100vh); opacity: 0; }
+        @keyframes ghost-fade {
+            0%   { opacity: 0;    transform: translateY(0px); }
+            15%  { opacity: 1; }
+            80%  { opacity: 0.18; }
+            100% { opacity: 0;    transform: translateY(-40px); }
         }
 
         /* ── Terminal titlebar on pre blocks ── */
@@ -301,49 +304,56 @@
   document.head.appendChild(main);
 ">
 
-<!-- Left side panel: packet / network stream -->
-<div class="side-panel left" aria-hidden="true">
-    <span style="animation-duration:6.1s; animation-delay:0.0s; color:#61afef">tcp:12345→1080</span>
-    <span style="animation-duration:7.4s; animation-delay:0.8s; color:#5c6370">0xdeadbeef</span>
-    <span style="animation-duration:5.8s; animation-delay:1.5s; color:#98c379">SYN ACK</span>
-    <span style="animation-duration:8.2s; animation-delay:2.1s; color:#5c6370">TTL=64</span>
-    <span style="animation-duration:6.7s; animation-delay:0.3s; color:#c678dd">REDIRECT</span>
-    <span style="animation-duration:9.0s; animation-delay:3.2s; color:#61afef">ssh -D 1080</span>
-    <span style="animation-duration:5.5s; animation-delay:1.9s; color:#5c6370">0x0800</span>
-    <span style="animation-duration:7.1s; animation-delay:4.0s; color:#98c379">ESTABLISHED</span>
-    <span style="animation-duration:6.3s; animation-delay:0.6s; color:#5c6370">nat OUTPUT</span>
-    <span style="animation-duration:8.8s; animation-delay:2.7s; color:#61afef">SOCKS5</span>
-    <span style="animation-duration:5.2s; animation-delay:3.8s; color:#5c6370">proto TCP</span>
-    <span style="animation-duration:7.6s; animation-delay:1.1s; color:#c678dd">redsocks</span>
-    <span style="animation-duration:6.9s; animation-delay:4.5s; color:#5c6370">FIN WAIT</span>
-    <span style="animation-duration:8.4s; animation-delay:0.4s; color:#98c379">DoH/443</span>
-    <span style="animation-duration:5.9s; animation-delay:2.3s; color:#5c6370">ff:ff:ff:ff</span>
-    <span style="animation-duration:7.3s; animation-delay:3.5s; color:#61afef">192.168.x.x</span>
-    <span style="animation-duration:6.0s; animation-delay:5.1s; color:#5c6370">PSH URG</span>
-    <span style="animation-duration:9.2s; animation-delay:1.7s; color:#98c379">encrypted</span>
-</div>
+<!-- Background floating terminal glyphs -->
+<div id="bg-canvas" aria-hidden="true"></div>
+<img src="data:x/x," style="display:none" alt="" onerror="
+(function(){
+  var words = [
+    {t:'tcp:12345→1080', c:'#61afef'}, {t:'0xdeadbeef',      c:'#5c6370'},
+    {t:'SYN ACK',        c:'#98c379'}, {t:'TTL=64',          c:'#5c6370'},
+    {t:'REDIRECT',       c:'#c678dd'}, {t:'ssh -D 1080',     c:'#61afef'},
+    {t:'0x0800',         c:'#5c6370'}, {t:'ESTABLISHED',     c:'#98c379'},
+    {t:'nat OUTPUT',     c:'#5c6370'}, {t:'SOCKS5',          c:'#61afef'},
+    {t:'proto TCP',      c:'#5c6370'}, {t:'redsocks',        c:'#c678dd'},
+    {t:'FIN WAIT',       c:'#5c6370'}, {t:'DoH/443',         c:'#98c379'},
+    {t:'ff:ff:ff:ff',    c:'#5c6370'}, {t:'192.168.x.x',     c:'#61afef'},
+    {t:'PSH URG',        c:'#5c6370'}, {t:'encrypted',       c:'#98c379'},
+    {t:'$ gnet',         c:'#98c379'}, {t:'iptables -t nat', c:'#5c6370'},
+    {t:'dnscrypt-proxy', c:'#61afef'}, {t:'resolv.conf',     c:'#5c6370'},
+    {t:'mullvad-doh',    c:'#c678dd'}, {t:'sysctl ipv6=0',   c:'#5c6370'},
+    {t:'tunnel active',  c:'#98c379'}, {t:'pkill redsocks',  c:'#5c6370'},
+    {t:'$ gstatus',      c:'#61afef'}, {t:'masked: yes',     c:'#5c6370'},
+    {t:'DNS: 127.0.0.1', c:'#98c379'}, {t:'leak: none',      c:'#5c6370'},
+    {t:'aes128-gcm',     c:'#c678dd'}, {t:'port 8022',       c:'#5c6370'},
+    {t:'Termux sshd',    c:'#61afef'}, {t:'$ gdown',         c:'#5c6370'},
+    {t:'ipv6 restored',  c:'#98c379'}, {t:'no leak ✓',       c:'#5c6370'}
+  ];
+  var canvas = document.getElementById('bg-canvas');
+  if (!canvas) return;
 
-<!-- Right side panel: shell / iptables stream -->
-<div class="side-panel right" aria-hidden="true">
-    <span style="animation-duration:7.2s; animation-delay:0.5s; color:#98c379">$ gnet</span>
-    <span style="animation-duration:5.7s; animation-delay:1.3s; color:#5c6370">iptables -t nat</span>
-    <span style="animation-duration:8.6s; animation-delay:2.8s; color:#61afef">dnscrypt-proxy</span>
-    <span style="animation-duration:6.4s; animation-delay:0.2s; color:#5c6370">resolv.conf</span>
-    <span style="animation-duration:7.9s; animation-delay:3.6s; color:#c678dd">mullvad-doh</span>
-    <span style="animation-duration:5.3s; animation-delay:1.8s; color:#5c6370">sysctl ipv6=0</span>
-    <span style="animation-duration:9.1s; animation-delay:4.2s; color:#98c379">tunnel active</span>
-    <span style="animation-duration:6.8s; animation-delay:0.9s; color:#5c6370">pkill redsocks</span>
-    <span style="animation-duration:7.5s; animation-delay:2.4s; color:#61afef">$ gstatus</span>
-    <span style="animation-duration:5.6s; animation-delay:3.9s; color:#5c6370">masked: yes</span>
-    <span style="animation-duration:8.3s; animation-delay:1.2s; color:#98c379">DNS: 127.0.0.1</span>
-    <span style="animation-duration:6.2s; animation-delay:4.7s; color:#5c6370">leak: none</span>
-    <span style="animation-duration:7.8s; animation-delay:0.7s; color:#c678dd">aes128-gcm</span>
-    <span style="animation-duration:5.4s; animation-delay:2.0s; color:#5c6370">port 8022</span>
-    <span style="animation-duration:9.3s; animation-delay:3.3s; color:#61afef">Termux sshd</span>
-    <span style="animation-duration:6.6s; animation-delay:1.6s; color:#5c6370">$ gdown</span>
-    <span style="animation-duration:8.1s; animation-delay:4.9s; color:#98c379">ipv6 restored</span>
-    <span style="animation-duration:7.0s; animation-delay:0.1s; color:#5c6370">no leak ✓</span>
-</div>
+  function spawn() {
+    var w   = words[Math.floor(Math.random() * words.length)];
+    var el  = document.createElement('span');
+    el.className   = 'bg-word';
+    el.textContent = w.t;
+    el.style.color = w.c;
+    el.style.left  = (Math.random() * 96) + '%';
+    el.style.top   = (Math.random() * 100) + 'vh';
+    var dur = 6 + Math.random() * 8;
+    var del = Math.random() * -dur;
+    el.style.animationDuration = dur + 's';
+    el.style.animationDelay   = del + 's';
+    canvas.appendChild(el);
+    /* remove after a few cycles to avoid DOM bloat */
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, (dur * 3) * 1000);
+  }
+
+  /* seed 40 words immediately */
+  for (var i = 0; i < 40; i++) spawn();
+  /* keep spawning a new one every 600ms */
+  setInterval(spawn, 600);
+})();
+">
 
 <h1>Tunneling All System Traffic Through Your Phone with SSH, redsocks, and Mullvad</h1>
 
